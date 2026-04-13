@@ -1,0 +1,14 @@
+---
+title: "Multidimensional Poverty Report"
+author: "Nome gruppo"
+format: html
+---
+
+## Introduzione
+
+Testo qui...
+
+## Analisi
+
+```{r}
+# codice R (oppure python)
