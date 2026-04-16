@@ -6,9 +6,62 @@ format: html
 
 ## Introduzione
 
-sto provando a smanettare, abbiate pietà
-ty
-miao miao
+
+
+```{r}
+library(jsonlite)
+
+# Carica i dati dal CSV
+df <- read.csv("https://ourworldindata.org/grapher/multidimensional-poverty-index-mpi-hot.csv?v=1&csvType=full&useColumnShortNames=true")
+
+# Carica i metadati dal JSON
+metadata <- fromJSON("https://ourworldindata.org/grapher/multidimensional-poverty-index-mpi-hot.metadata.json?v=1&csvType=full&useColumnShortNames=true")
+
+dfGH <- df[c(76,77,78,79,80),]
+dfNGA <- df[c(165,166,167,168),]
+dfSEN <- df[c(193,194,195,196),]
+
+#GHANA
+dfGH <- dfGH[order(dfGH$year), ]
+anni_completi_GH <- seq(min(dfGH$year), max(dfGH$year), by = 1)
+val_interp_GH <- approx(
+  x = dfGH$year,
+  y = dfGH$mpi,
+  xout = anni_completi_GH
+)
+df_interp_GH <- data.frame(
+  year = val_interp_GH$x,
+  mpi = val_interp_GH$y
+)
+
+#NIGERIA
+dfNGA <- dfNGA[order(dfNGA$year), ]
+anni_completi_NGA <- seq(min(dfNGA$year), max(dfNGA$year), by = 1)
+val_interp_NGA <- approx(
+  x = dfNGA$year,
+  y = dfNGA$mpi,
+  xout = anni_completi_NGA
+)
+df_interp_NGA <- data.frame(
+  year = val_interp_NGA$x,
+  mpi = val_interp_NGA$y
+)
+
+#SENEGAL
+dfSEN <- dfSEN[order(dfSEN$year), ]
+anni_completi_SEN <- seq(min(dfSEN$year), max(dfSEN$year), by = 1)
+val_interp_SEN <- approx(
+  x = dfSEN$year,
+  y = dfSEN$mpi,
+  xout = anni_completi_SEN
+)
+df_interp_SEN <- data.frame(
+  year = val_interp_SEN$x,
+  mpi = val_interp_SEN$y
+)
+```
+
+
 
 ## Analisi
 
