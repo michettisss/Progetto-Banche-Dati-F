@@ -1,0 +1,103 @@
+---
+title: "Multipoverty"
+author: "Gruppo F"
+format: html
+---
+
+
+```{r}
+library(jsonlite)
+
+# Carica i dati dal CSV
+df <- read.csv("https://ourworldindata.org/grapher/multidimensional-poverty-index-mpi-hot.csv?v=1&csvType=full&useColumnShortNames=true")
+
+# Carica i metadati dal JSON
+metadata <- fromJSON("https://ourworldindata.org/grapher/multidimensional-poverty-index-mpi-hot.metadata.json?v=1&csvType=full&useColumnShortNames=true")
+
+dfGH <- df[c(76,77,78,79,80),]
+dfNGA <- df[c(165,166,167,168),]
+dfSEN <- df[c(193,194,195,196),]
+
+#GHANA
+dfGH <- dfGH[order(dfGH$year), ]
+anni_completi_GH <- seq(min(dfGH$year), max(dfGH$year), by = 1)
+val_interp_GH <- approx(
+  x = dfGH$year,
+  y = dfGH$mpi,
+  xout = anni_completi_GH
+)
+df_interp_GH <- data.frame(
+  year = val_interp_GH$x,
+  mpi = val_interp_GH$y
+)
+
+#NIGERIA
+dfNGA <- dfNGA[order(dfNGA$year), ]
+anni_completi_NGA <- seq(min(dfNGA$year), max(dfNGA$year), by = 1)
+val_interp_NGA <- approx(
+  x = dfNGA$year,
+  y = dfNGA$mpi,
+  xout = anni_completi_NGA
+)
+df_interp_NGA <- data.frame(
+  year = val_interp_NGA$x,
+  mpi = val_interp_NGA$y
+)
+
+#SENEGAL
+dfSEN <- dfSEN[order(dfSEN$year), ]
+anni_completi_SEN <- seq(min(dfSEN$year), max(dfSEN$year), by = 1)
+val_interp_SEN <- approx(
+  x = dfSEN$year,
+  y = dfSEN$mpi,
+  xout = anni_completi_SEN
+)
+df_interp_SEN <- data.frame(
+  year = val_interp_SEN$x,
+  mpi = val_interp_SEN$y
+)
+```
+
+
+#Da capire se va inserite delle tabelle prima dei grafici, oppure se è meglio inserire solo i grafici con i dati interpolati.
+
+```{r}
+#Grafico 3 paesi a confronto (anche anni diversi)
+df_interp_GH$country <- "Ghana"
+df_interp_NGA$country <- "Nigeria"
+df_interp_SEN$country <- "Senegal"
+df_final <- rbind(df_interp_GH, df_interp_NGA, df_interp_SEN)
+library(ggplot2)
+
+ggplot(df_final, aes(x = year, y = mpi, color = country)) +
+  geom_line(size = 1.2) +
+  labs(
+    title = "Confronto MPI (interpolato annualmente)",
+    x = "Anno",
+    y = "MPI",
+    color = "Paese"
+  ) +
+  theme_minimal()
+
+
+#Grafico 3 paesi a confronto (2013-2021)
+df_interp_GH_F <- df_interp_GH[c(6:14),]
+df_interp_SEN_F <- df_interp_SEN[c(4:12),]
+df_interp_NGA_F <- df_interp_NGA[,]
+
+
+df_interp_GH_F$country <- "Ghana"
+df_interp_NGA_F$country <- "Nigeria"
+df_interp_SEN_F$country <- "Senegal"
+df_final_F <- rbind(df_interp_GH_F, df_interp_NGA_F, df_interp_SEN_F)
+library(ggplot2)
+ggplot(df_final_F, aes(x = year, y = mpi, color = country)) +
+  geom_line(size = 1.2) +
+  labs(
+    title = "Confronto MPI (interpolato annualmente) 2013-2021",
+    x = "Anno",
+    y = "MPI",
+    color = "Paese"
+  ) +
+    theme_minimal()
+```
