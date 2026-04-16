@@ -1,11 +1,8 @@
 ---
-title: "Multidimensional Poverty Report"
-author: "Nome gruppo"
+title: "Multipoverty"
+author: "Gruppo F"
 format: html
 ---
-
-## Introduzione
-
 
 
 ```{r}
@@ -61,6 +58,7 @@ df_interp_SEN <- data.frame(
 )
 ```
 
+
 #Da capire se va inserite delle tabelle prima dei grafici, oppure se è meglio inserire solo i grafici con i dati interpolati.
 
 ```{r}
@@ -101,13 +99,5 @@ ggplot(df_final_F, aes(x = year, y = mpi, color = country)) +
     y = "MPI",
     color = "Paese"
   ) +
-  theme_minimal()
+    theme_minimal()
 ```
-
-```{r}
-git push
-```
-## Analisi
-
-```{r}
-# codice R (oppure python)
