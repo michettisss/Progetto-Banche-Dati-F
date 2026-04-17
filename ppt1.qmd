@@ -1,9 +1,0 @@
----
-title: "PPT1"
-format: html
----
-Ciao a tutti, oggi parleremo di multidimensional poverty index, un indice che misura la povertà in modo più completo rispetto al reddito.
-Il multidimensional poverty index tiene conto di diversi aspetti della vita delle persone, come l'istruzione, la salute e le condizioni di vita. In questo modo, possiamo avere una visione più accurata della povertà e delle sfide che le persone affrontano.
-In questo grafico, possiamo vedere l'andamento del multidimensional poverty index in tre paesi: Ghana, Nigeria e Senegal. Come possiamo vedere, il Ghana ha un indice più basso rispetto agli altri due paesi, il che significa che ha una situazione di povertà meno grave.
-Il Senegal, invece, ha un indice più alto, il che indica una situazione di povertà più grave. La Nigeria si trova in una posizione intermedia, con un indice che è più alto del Ghana ma più basso del Senegal.
-Questi dati ci mostrano l'importanza di considerare diversi aspetti della povertà e di lavorare per migliorare le condizioni di vita delle persone in questi paesi. Dobbiamo continuare a monitorare l'andamento del multidimensional poverty index e adottare politiche che affrontino le sfide specifiche di ogni paese per migliorare la situazione di povertà.
