@@ -6,10 +6,6 @@ format: html
 
 ## Introduzione
 
-sto provando a smanettare, abbiate pietà
-ty
-miao miao
-
 ## Analisi
 
 ```{r}
