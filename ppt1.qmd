@@ -1,5 +1,0 @@
----
-title: "PPT1"
-format: Revealjs
----
-
