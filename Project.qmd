@@ -210,6 +210,34 @@ gdp_sum <- gdp %>%
 ```
 
 # POPOLAZIONE
+```{r}
+pop <- read_excel ("pop.xlsx")
+pop <- pop[c(1:4),c(-2,-3,-4)]
+names(pop)
+if ("Country Name" %in% names(pop)) {
+  names(pop)[names(pop) == "Country Name"] <- "Country.Name"
+}
+
+pop[ , -1] <- lapply(pop[ , -1], function(x) as.numeric(as.character(x)))
+pop_long <- pop %>%
+  pivot_longer(
+    cols = -Country.Name,
+    names_to = "year",
+    values_to = "Population"
+  )
+pop_long$year <- as.integer(sub("\\[.*", "", pop_long$year))
+
+ggplot(pop_long, aes(x = year, y = Population, color = Country.Name)) +
+  geom_line(size = 1.2) +
+  labs(
+    title = "Popolazione",
+    x = "Anno",
+    y = "Popolazione",
+    color = "Paese"
+  ) +
+  theme_minimal()
+```
+
 # ELETTRICITÀ
 # INVESTIMENTI STRANIERI
 
