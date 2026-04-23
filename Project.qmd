@@ -169,7 +169,6 @@ ggplot(fert_long, aes(x = year, y = Fertility, color = Country.Name)) +
 
 
 # ACQUA
-
 ```{r}
 wat <- read_excel ("Acqua.xlsx")
 wat <- wat[c(1:4),c(-2,-3,-4)]
@@ -199,11 +198,17 @@ ggplot(wat_long, aes(x = year, y = Acqua, color = Country.Name)) +
   theme_minimal()
 ```
 
-# TASSO DI MORTALITÀ
+# TASSO DI MORTALITÀ - sbagliato
 ```{r}
 mort <- read_excel ("tasso di mort.xlsx")
-mort <- mort[c(1:4),c(-2,-3,-4)]
+library(dplyr)
+
+gdp_sum <- gdp %>%
+  group_by(Country) %>%
+  summarise(Mortality = sum(Mortality, na.rm = TRUE))
+
 ```
+
 # POPOLAZIONE
 # ELETTRICITÀ
 # INVESTIMENTI STRANIERI
