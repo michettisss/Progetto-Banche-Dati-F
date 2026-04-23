@@ -201,15 +201,42 @@ ggplot(wat_long, aes(x = year, y = Acqua, color = Country.Name)) +
 # TASSO DI MORTALITÀ - sbagliato
 ```{r}
 mort <- read_excel ("tasso di mort.xlsx")
+mort <- mort[c(1:8),c(-2,-3,-4)]
 library(dplyr)
 
-gdp_sum <- gdp %>%
-  group_by(Country) %>%
-  summarise(Mortality = sum(Mortality, na.rm = TRUE))
+names(mort)
+if ("Country Name" %in% names(mort)) {
+  names(mort)[names(mort) == "Country Name"] <- "Country.Name"
+}
+
+mort[ , -1] <- lapply(mort[ , -1], function(x) as.numeric(as.character(x)))
+
+mort_long <- mort %>%
+  pivot_longer(cols = -Country.Name, names_to = "year", values_to = "Mortality")
+
+mort_long$year <- as.integer(sub("\\[.*", "", mort_long$year))
+
+mort_final <- mort_long %>%
+  group_by(Country.Name, year) %>%
+  summarise(Mortality = mean(Mortality, na.rm = TRUE))
+
+ggplot(mort_final, aes(x = year, y = Mortality, color = Country.Name)) +
+  geom_line(size = 1.2) +
+  labs(
+    title = "Tasso di mortalità",
+    x = "Anno",
+    y = "Tasso di mortalità",
+    color = "Paese"
+  ) +
+  theme_minimal()
 
 ```
 
 # POPOLAZIONE
+```{r}
+
+```
+
 # ELETTRICITÀ
 # INVESTIMENTI STRANIERI
 
