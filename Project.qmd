@@ -264,202 +264,63 @@ ggplot(pop_long, aes(x = year, y = Population, color = Country.Name)) +
 ```
 
 # ELETTRICITÀ
+
+```{r}
+elet <- read_excel ("accesso elettricità.xlsx")
+elet <- elet[c(1:4),c(-2,-3,-4)]
+elet <- wat[,c(1,8:ncol(wat))]
+names(elet)
+if ("Country Name" %in% names(elet)) {
+  names(elet)[names(elet) == "Country Name"] <- "Country.Name"
+}
+
+elet[ , -1] <- lapply(elet[ , -1], function(x) as.numeric(as.character(x)))
+elet_long <- elet %>%
+  pivot_longer(
+    cols = -Country.Name,
+    names_to = "year",
+    values_to = "Electricity"
+  )
+elet_long$year <- as.integer(sub("\\[.*", "", elet_long$year))
+
+ggplot(elet_long, aes(x = year, y = Electricity , color = Country.Name)) +
+  geom_line(size = 1.2) +
+  labs(
+    title = "Electricità",
+    x = "Anno",
+    y = " Accesso all'elettricità",
+    color = "Paese"
+  ) +
+  theme_minimal()
+```
+
 # INVESTIMENTI STRANIERI
 
-
-
-
-
-fakjnfoqnfonfoqnfoqejnfqoenfoqefeoq
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ```{r}
-library(jsonlite)
+invst <- read_excel("investimenti stranieri.xlsx")
+invst <- invst[c(1:4), c(-2, -3, -4)]
 
-# Carica i dati dal CSV
-df <- read.csv("https://ourworldindata.org/grapher/multidimensional-poverty-index-mpi-hot.csv?v=1&csvType=full&useColumnShortNames=true")
+if ("Country Name" %in% names(invst)) {
+  names(invst)[names(invst) == "Country Name"] <- "Country.Name"
+}
 
-# Carica i metadati dal JSON
-metadata <- fromJSON("https://ourworldindata.org/grapher/multidimensional-poverty-index-mpi-hot.metadata.json?v=1&csvType=full&useColumnShortNames=true")
+invst[ , -1] <- lapply(invst[ , -1], function(x) as.numeric(as.character(x)))
 
-dfGH <- df[c(76,77,78,79,80),]
-dfNGA <- df[c(165,166,167,168),]
-dfSEN <- df[c(193,194,195,196),]
+invst_long <- invst %>%
+  pivot_longer(
+    cols = -Country.Name,
+    names_to = "year",
+    values_to = "Investimenti_Stranieri"   # safe name (no spaces)
+  )
 
-#GHANA
-dfGH <- dfGH[order(dfGH$year), ]
-anni_completi_GH <- seq(min(dfGH$year), max(dfGH$year), by = 1)
-val_interp_GH <- approx(
-  x = dfGH$year,
-  y = dfGH$mpi,
-  xout = anni_completi_GH
-)
-df_interp_GH <- data.frame(
-  year = val_interp_GH$x,
-  mpi = val_interp_GH$y
-)
+invst_long$year <- as.integer(sub("\\[.*", "", invst_long$year))
 
-#NIGERIA
-dfNGA <- dfNGA[order(dfNGA$year), ]
-anni_completi_NGA <- seq(min(dfNGA$year), max(dfNGA$year), by = 1)
-val_interp_NGA <- approx(
-  x = dfNGA$year,
-  y = dfNGA$mpi,
-  xout = anni_completi_NGA
-)
-df_interp_NGA <- data.frame(
-  year = val_interp_NGA$x,
-  mpi = val_interp_NGA$y
-)
-
-#SENEGAL
-dfSEN <- dfSEN[order(dfSEN$year), ]
-anni_completi_SEN <- seq(min(dfSEN$year), max(dfSEN$year), by = 1)
-val_interp_SEN <- approx(
-  x = dfSEN$year,
-  y = dfSEN$mpi,
-  xout = anni_completi_SEN
-)
-df_interp_SEN <- data.frame(
-  year = val_interp_SEN$x,
-  mpi = val_interp_SEN$y
-)
-```
-
-
-#Da capire se va inserite delle tabelle prima dei grafici, oppure se è meglio inserire solo i grafici con i dati interpolati.
-
-
-#MPI interpolato annualmente per Ghana, Nigeria e Senegal (2013-2021)
-
-```{r}
-#Grafico 3 paesi a confronto (anche anni diversi)
-df_interp_GH$country <- "Ghana"
-df_interp_NGA$country <- "Nigeria"
-df_interp_SEN$country <- "Senegal"
-df_final <- rbind(df_interp_GH, df_interp_NGA, df_interp_SEN)
-library(ggplot2)
-
-ggplot(df_final, aes(x = year, y = mpi, color = country)) +
+ggplot(invst_long, aes(x = year, y = Investimenti_Stranieri, color = Country.Name)) +
   geom_line(size = 1.2) +
   labs(
-    title = "Confronto MPI (interpolato annualmente)",
+    title = "Investimenti stranieri",
     x = "Anno",
-    y = "MPI",
-    color = "Paese"
-  ) +
-  theme_minimal()
-
-
-#Grafico 3 paesi a confronto (2013-2021)
-df_interp_GH_F <- df_interp_GH[c(6:14),]
-df_interp_SEN_F <- df_interp_SEN[c(4:12),]
-df_interp_NGA_F <- df_interp_NGA[,]
-
-
-df_interp_GH_F$country <- "Ghana"
-df_interp_NGA_F$country <- "Nigeria"
-df_interp_SEN_F$country <- "Senegal"
-df_final_F <- rbind(df_interp_GH_F, df_interp_NGA_F, df_interp_SEN_F)
-library(ggplot2)
-ggplot(df_final_F, aes(x = year, y = mpi, color = country)) +
-  geom_line(size = 1.2) +
-  labs(
-    title = "Confronto MPI (interpolato annualmente) 2013-2021",
-    x = "Anno",
-    y = "MPI",
-    color = "Paese"
-  ) +
-    theme_minimal()
-```
-
-# ELETTRICITÀ
-
-```{r}
-#ELETTRICITÀ
-df_ele <- read.csv("elet.csv")
-df_ele <- df_ele[c(1:3),c(-2,-3,-4)]
-
-library(tidyr)
-
-df_ele_long <- pivot_longer(
-  df_ele,
-  cols = -Country.Name,   # tutte le colonne tranne il paese
-  names_to = "year",
-  values_to = "value"
-)
-
-df_ele_long$year <- as.numeric(sub("X(\\d{4}).*", "\\1", df_ele_long$year))
-df_ele_GH <- df_ele_long[c(1:9),]
-df_ele_NGA <- df_ele_long[c(10:18),]
-df_ele_SEN <- df_ele_long[c(19:27),]
-
-
-#Grafico 3 paesi - elettricità
-
-df_ele_final <- rbind(df_ele_GH, df_ele_NGA, df_ele_SEN)
-
-library(ggplot2)
-ggplot(df_ele_long, aes(x = year, y = value, color = Country.Name)) +
-  geom_line(size = 1.2) +
-  labs(
-    title = "Access to electricity (% of population) 2013-2021",
-    x = "Anno",
-    y = "% of population",
-    color = "Paese"
-  ) +
-  theme_minimal()
-```
-
-# EDUCATION
-```{r}
-#Average years of schooling among adult above 25
-df_edu <- read.csv ("edu.csv")
-ggplot(df_edu, aes(x = Year, y = Both.genders, color = Entity)) +
-  geom_line(size = 1.2) +
-  labs(
-    title = "Average years of schooling among adult above 25 2013-2021",
-    x = "Anno",
-    y = "Average years",
+    y = "Investimenti stranieri",
     color = "Paese"
   ) +
   theme_minimal()
