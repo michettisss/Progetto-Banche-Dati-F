@@ -12,13 +12,13 @@ library(jsonlite)
 hdi.ssa <- fromJSON("hdr-data.json")
 hdi.ssa <- hdi.ssa[, c(2,8,11)]
 names(hdi.ssa)[names(hdi.ssa) == "value"] <- "HDI"
-hdi.ssa$year <- as.numeric(hdi.ssa$year)
+hdi.ssa$year <- as.integer(hdi.ssa$year)
 hdi.ssa$HDI <- as.numeric(hdi.ssa$HDI)
 
 hdi.w <- fromJSON("hdi.world.json")
 hdi.w <- hdi.w[, c(2,8,11)]
 names(hdi.w)[names(hdi.w) == "value"] <- "HDI"
-hdi.w$year <- as.numeric(hdi.w$year)
+hdi.w$year <- as.integer(hdi.w$year)
 hdi.w$HDI <- as.numeric(hdi.w$HDI)
 
 
@@ -36,13 +36,70 @@ ggplot(hdi, aes(x = year, y = HDI, color = country)) +
   scale_y_continuous(breaks = seq(0.4, 0.8, by = 0.05)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-
-
 ```
 
-# CONFRONTO TRA SUDAFRICA, NIGERIA E SENEGAL 
+# CONFRONTO TRA SUDAFRICA, NIGERIA, GHANA, SENEGAL 
 
+```{r}
+#NIGERIA
+hdi.nga <- fromJSON("hdi.NGA.json")
+hdi.nga <- hdi.nga[, c(2,8,11)]
+names(hdi.nga)[names(hdi.nga) == "value"] <- "HDI"
+hdi.nga$year <- as.integer(hdi.nga$year)
+hdi.nga$HDI <- as.numeric(hdi.nga$HDI)
+
+#GHANA
+hdi.gha <- fromJSON("hdi.gha.json")
+hdi.gha <- hdi.gha[, c(2,8,11)]
+names(hdi.gha)[names(hdi.gha) == "value"] <- "HDI"
+hdi.gha$year <- as.integer(hdi.gha$year)
+hdi.gha$HDI <- as.numeric(hdi.gha$HDI)
+
+#SENEGAL
+hdi.sen <- fromJSON("hdi.sen.json")
+hdi.sen <- hdi.sen[, c(2,8,11)]
+names(hdi.sen)[names(hdi.sen) == "value"] <- "HDI"
+hdi.sen$year <- as.integer(hdi.sen$year)
+hdi.sen$HDI <- as.numeric(hdi.sen$HDI)
+
+#SUDAFRICA
+#NIGERIA
+hdi.nga <- fromJSON("hdi.NGA.json")
+hdi.nga <- hdi.nga[, c(2,8,11)]
+names(hdi.nga)[names(hdi.nga) == "value"] <- "HDI"
+hdi.nga$year <- as.integer(hdi.nga$year)
+hdi.nga$HDI <- as.numeric(hdi.nga$HDI)
+
+#GHANA
+hdi.gha <- fromJSON("hdi.gha.json")
+hdi.gha <- hdi.gha[, c(2,8,11)]
+names(hdi.gha)[names(hdi.gha) == "value"] <- "HDI"
+hdi.gha$year <- as.integer(hdi.gha$year)
+hdi.gha$HDI <- as.numeric(hdi.gha$HDI)
+
+#SENEGAL
+hdi.zaf <- fromJSON("hdi.zaf.json")
+hdi.zaf <- hdi.zaf[, c(2,8,11)]
+names(hdi.zaf)[names(hdi.zaf) == "value"] <- "HDI"
+hdi.zaf$year <- as.integer(hdi.zaf$year)
+hdi.zaf$HDI <- as.numeric(hdi.zaf$HDI)
+
+#GRAFICO 3 paesi a confronto
+hdi_3 <- rbind(hdi.nga, hdi.gha, hdi.sen, hdi.zaf, hdi.ssa)
+ggplot(hdi_3, aes(x = year, y = HDI, color = country)) +
+  geom_line(size = 1.2) +
+  labs(
+    title = "HDI Nigeria, Ghana, Senegal, Sudafrica",
+    x = "Anno",
+    y = "HDI",
+    color = "Paese"
+  ) +
+  scale_x_continuous(breaks = seq(1990, 2023, by = 5)) +
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = 0.05)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  
+
+```
 ## GDP PER CAPITA
 
 ```{r}
@@ -72,7 +129,10 @@ ggplot(gdp_long, aes(x = year, y = gdp, color = Country.Name)) +
 ```
 
 ## ciaooooo
-#cai
+
+
+fakjnfoqnfonfoqnfoqejnfqoenfoqefeoq
+
 
 
 
@@ -204,7 +264,6 @@ ggplot(df_final_F, aes(x = year, y = mpi, color = country)) +
 ```
 
 # ELETTRICITÀ
-
 
 ```{r}
 #ELETTRICITÀ
