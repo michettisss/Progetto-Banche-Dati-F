@@ -246,7 +246,7 @@ d_mort <- describe(mort)
 View(d_mort)
 
 ```
-ciao ciao speriamo di risolvere
+ciao ciao speriamo di risolvere, micio miao micio
 
 # POPOLAZIONE
 ```{r}

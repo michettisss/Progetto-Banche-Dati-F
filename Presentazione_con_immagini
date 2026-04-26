@@ -119,14 +119,28 @@
             \item Ruolo cruciale delle politiche mirate e dell'istruzione
         \end{itemize}
     \end{frame}
-% --- SLIDE 1: Immagine singola con didascalia (Posizionamento standard) ---
-    \begin{frame}{Focus: Differenza nell' Indice di Sviluppo Umano con il mondo }
-        \begin{figure}
-            \centering
-            \includegraphics[width=0.7\textwidth]{ggplot2 line chart 1.pdf}
-            \caption{andamento dell'HDI nel mondo e nell'Africa subsahariana}
-        \end{figure}
-    \end{frame}
+    
+    \begin{frame}{Dove eravamo rimasti?}
+		\begin{itemize}
+			Scrivere in modo coinciso le domande di ricerca e come vogliamo spiegare l'HDI secondo le variabili
+		\end{itemize}
+		
+	\end{frame}
+	
+	%----------------------
+	\begin{frame}{Variabili d'interesse:}
+		\begin{itemize}
+			\item FDI (\% PIL)→ Investimenti esteri netti in rapporto al PIL
+			\item Accesso elettricità → \% popolazione con elettricità
+			\item Acqua potabile → \% popolazione con accesso base
+			\item Fertilità → Numero medio figli per donna
+			\item PIL pro capite → Reddito medio per abitante
+			\item Mortalità maschile → Morti uomini adulti per 1000
+			\item Mortalità femminile → Morti donne adulte per 1000
+			\item Popolazione totale → Numero abitanti
+		\end{itemize}
+	
+	\end{frame}
 
 % --- SLIDE 2: Immagine singola con didascalia (Posizionamento standard) ---
     \begin{frame}{HDI nei paesi dell'Africa subsahariana}
