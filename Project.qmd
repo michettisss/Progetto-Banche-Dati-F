@@ -7,6 +7,8 @@ format: html
 # CONFRONTO SUB-SAHARAN AFRICA CON IL MONDO
 
 ```{r}
+install.packages("psych")
+library(psych)
 install.packages("jsonlite")
 library(jsonlite)
 hdi.ssa <- fromJSON("hdr-data.json")
@@ -97,7 +99,9 @@ ggplot(hdi_3, aes(x = year, y = HDI, color = country)) +
   scale_x_continuous(breaks = seq(1990, 2023, by = 5)) +
   scale_y_continuous(breaks = seq(0.4, 0.8, by = 0.05)) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))  
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+d_hdi_3 <- (describe(hdi_3)) 
+View(d_hdi_3)
 
 ```
 
@@ -136,6 +140,9 @@ ggplot(gdp_long, aes(x = year, y = gdp, color = Country.Name)) +
     color = "Paese"
   ) +
   theme_minimal()
+d_gdp <- (describe(gdp)) 
+View(d_gdp)
+
 ```
 
 # FERTILITÀ
@@ -165,6 +172,8 @@ ggplot(fert_long, aes(x = year, y = Fertility, color = Country.Name)) +
     color = "Paese"
   ) +
   theme_minimal()
+d_fert <- describe(fert)
+View(d_fert)
 ```
 
 
@@ -196,6 +205,9 @@ ggplot(wat_long, aes(x = year, y = Acqua, color = Country.Name)) +
     color = "Paese"
   ) +
   theme_minimal()
+d_wat <- describe(wat)
+View(d_wat)
+
 ```
 
 
@@ -230,6 +242,8 @@ ggplot(mort_final, aes(x = year, y = Mortality, color = Country.Name)) +
     color = "Paese"
   ) +
   theme_minimal()
+d_mort <- describe(mort)
+View(d_mort)
 
 ```
 ciao ciao speriamo di risolvere
@@ -261,6 +275,8 @@ ggplot(pop_long, aes(x = year, y = Population, color = Country.Name)) +
     color = "Paese"
   ) +
   theme_minimal()
+d_pop <- describe(pop)
+View(d_pop)
 ```
 
 # ELETTRICITÀ
@@ -292,6 +308,8 @@ ggplot(elet_long, aes(x = year, y = Electricity , color = Country.Name)) +
     color = "Paese"
   ) +
   theme_minimal()
+d_elet <- describe(elet)
+View(d_elet)
 ```
 
 # INVESTIMENTI STRANIERI
@@ -324,4 +342,6 @@ ggplot(invst_long, aes(x = year, y = Investimenti_Stranieri, color = Country.Nam
     color = "Paese"
   ) +
   theme_minimal()
+d_invst <- describe(invst)
+View(d_invst)
 ```
