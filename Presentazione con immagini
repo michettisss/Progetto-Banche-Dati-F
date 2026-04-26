@@ -1,0 +1,229 @@
+\documentclass{beamer}
+
+% --- Temi e Colori ---
+\usetheme{Madrid}
+\usecolortheme{spruce}
+
+\usepackage[utf8]{inputenc} 
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{xcolor} 
+
+% Definizione colore personalizzato e applicazione corretta
+\definecolor{darkgreen}{RGB}{0,102,51}
+\setbeamercolor{structure}{fg=darkgreen}
+
+% --- Configurazione Link ---
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue
+}
+
+% Mostra solo il numero di pagina nel footer (più pulito)
+\setbeamertemplate{footline}[page number]
+
+% --- Informazioni Documento ---
+\title{Multidimensional Poverty in Sub-Saharan Africa}
+\author{Gruppo F: Bondi, Dal Ben, Michetti, Proietti, Veronese}
+\date{\today}
+
+\begin{document}
+    
+    % --- Titolo ---
+    \begin{frame}
+        \titlepage
+    \end{frame}
+    
+    % --- Research Question ---
+    \begin{frame}{Research Question}
+        La crescita economica è sufficiente per ridurre la povertà multidimensionale oppure sono necessari interventi mirati?
+        \vspace{0.5cm}
+        \begin{itemize}
+            \item \textbf{Dataset utilizzato:} \href{https://ourworldindata.org/grapher/multidimensional-poverty-index-mpi-hot}{Our World in Data}
+        \end{itemize}
+    \end{frame}
+    
+    % --- Domande Descrittive ---
+    \begin{frame}{Domande descrittive}
+        \begin{itemize}
+            \item Evoluzione della povertà multidimensionale (2013--2021)
+            \item Confronto tra Senegal, Ghana e Nigeria
+            \item Quali fattori della multidimensionalità incidono di più? (MPI)
+        \end{itemize}
+    \end{frame}
+    
+    % --- Domande Comparative ---
+    \begin{frame}{Domande comparative}
+        \begin{itemize}
+            \item Differenze tra i paesi analizzati
+            \item Povertà multidimensionale vs povertà monetaria
+            \item Crescita economica $\rightarrow$ riduzione della povertà?
+            \item Impatto dell'istruzione sulla povertà
+            \item Investire nel capitale umano è efficace?
+        \end{itemize}
+    \end{frame}
+    
+    % --- Selezione Paesi ---
+    \begin{frame}{Perché questi paesi? (Senegal, Ghana, Nigeria)}
+        \begin{itemize}
+            \item Diversi livelli di povertà multidimensionale
+            \item Differenti strutture economiche e demografiche
+            \item Politiche pubbliche eterogenee
+            \item Disponibilità di dataset comparabili
+        \end{itemize}
+    \end{frame}
+    
+    % --- Problemi Dati ---
+    \begin{frame}{Problema dei dati}
+        \begin{itemize}
+            \item Serie storiche incomplete (anni mancanti nel dataset MPI)
+            \item Difficoltà nel confronto temporale diretto
+            \item \textbf{Integrazione dati:} \href{https://databank.worldbank.org/source/world-development-indicators}{World Bank}
+        \end{itemize}
+    \end{frame}
+    
+    % --- Interpolazione ---
+    \begin{frame}{Interpolazione lineare}
+        \begin{itemize}
+            \item Stima dei valori mancanti tra le osservazioni
+            \item Costruzione di serie temporali continue
+            \item \textbf{Processo:} Anni mancanti $\rightarrow$ Stima $\rightarrow$ Serie complete
+        \end{itemize}
+    \end{frame}
+    
+    % --- Vantaggi Interpolazione ---
+    \begin{frame}{Perché interpolare?}
+        \begin{itemize}
+            \item Migliora la visualizzazione dei trend a lungo termine
+            \item Facilita il confronto diretto tra i paesi
+            \item Mantiene la dinamica generale senza distorcere i dati reali
+        \end{itemize}
+    \end{frame}
+
+    % --- Grafico ---
+    \begin{frame}{Grafico interpolato}
+        \begin{figure}
+            \centering
+            % Assicurati che Grafico1.pdf sia nella stessa cartella
+            \includegraphics[width=0.85\textwidth]{Grafico1.pdf}
+            \caption{Andamento MPI interpolato (2013--2021)}
+        \end{figure}
+    \end{frame}
+    
+    % --- Conclusione ---
+    \begin{frame}{Conclusione}
+        \begin{itemize}
+            \item Necessità di un'analisi multidimensionale oltre il PIL
+            \item Eterogeneità marcata tra i paesi dell'Africa Subsahariana
+            \item Ruolo cruciale delle politiche mirate e dell'istruzione
+        \end{itemize}
+    \end{frame}
+% --- SLIDE 1: Immagine singola con didascalia (Posizionamento standard) ---
+    \begin{frame}{Focus: Differenza nell' Indice di Sviluppo Umano con il mondo }
+        \begin{figure}
+            \centering
+            \includegraphics[width=0.7\textwidth]{ggplot2 line chart 1.pdf}
+            \caption{andamento dell'HDI nel mondo e nell'Africa subsahariana}
+        \end{figure}
+    \end{frame}
+
+% --- SLIDE 2: Immagine singola con didascalia (Posizionamento standard) ---
+    \begin{frame}{HDI nei paesi dell'Africa subsahariana}
+        \begin{figure}
+            \centering
+            \includegraphics[width=0.7\textwidth]{ggplot2 line chart 1.pdf}
+            \caption{andamento dell'HDI nei paesi presi in esame}
+        \end{figure}
+    \end{frame}
+
+    % --- SLIDE 3: immagine con didascalia ---
+    \begin{frame}{GDP per Capita}
+        \begin{columns}
+            \begin{column}{0.6\textwidth}
+                Analisi dei differenti GDP tra i paesi in esame:
+                \begin{itemize}
+                    \item Sud Africa GDP più elevato rispetto agli altri
+                    \item gli altri hanno un andamento simile pur rimanendo in testa la Nigeria
+                \end{itemize}
+            \end{column}
+            \begin{column}{0.4\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{ggplot2 line chart 3.pdf}
+                \captionof{figure}{GDP}
+            \end{column}
+        \end{columns}
+    \end{frame}
+
+    % --- SLIDE 4: VS ---
+\begin{frame}{Acqua ed Elettricità }
+        \begin{columns}
+            \begin{column}{0.5\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{ggplot2 line chart 5.pdf}
+                \captionof{Trend Acqua}
+            \end{column}
+            \begin{column}{0.5\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{ggplot2 line chart 8.pdf}
+                \captionof{Trend Elettricità}
+            \end{column}
+        \end{columns}
+    \end{frame}
+
+% --- SLIDE 5: Confronto Triplo ---
+    \begin{frame}{Analisi Comparativa: Senegal, Ghana e Nigeria}
+        \begin{columns}[t] % [t] allinea il contenuto delle colonne in alto
+            
+            % Prima Colonna: fertilità
+            \begin{column}{0.32\textwidth}
+                \centering
+                \textbf{Fertilità} \\
+                \vspace{0.2cm}
+                \includegraphics[width=\textwidth]{ggplot2 line chart 4.pdf}
+               
+            \end{column}
+
+            % Seconda Colonna: tasso di mortalità
+            \begin{column}{0.32\textwidth}
+                \centering
+                \textbf{Tasso di mortalità} \\
+                \vspace{0.2cm}
+                \includegraphics[width=\textwidth]{ggplot2 line chart 6.pdf}
+                
+            \end{column}
+
+            % Terza Colonna: Popolazione
+            \begin{column}{0.32\textwidth}
+                \centering
+                \textbf{Popolazione} \\
+                \vspace{0.2cm}
+                \includegraphics[width=\textwidth]{ggplot2 line chart 7.pdf}
+                
+            \end{column}
+            
+        \end{columns}
+
+        \vspace{0.5cm}
+        \begin{block}{Osservazione}
+            \small pur essendo il primo per GDP il Sud Africa non risulta sempre primo negli altri valori come per esempio la popolazione, ciò rivela che una maggiore ricchezza non significa maggiore tenore di vita
+        \end{block}
+    \end{frame}
+    % --- SLIDE 6: investimenti ---
+    \begin{frame}{Investimenti stranieri}
+        \begin{columns}
+            \begin{column}{0.6\textwidth}
+                investimenti effettuati negli anni:
+                \begin{itemize}
+                    \item gli investimenti sono in aumento tranne per il ghana che sono diminuiti
+                    \item anche se il senegal era uno dei paesi più in dietro da questo punto di vista negli ultimi anni ha avuto una crescita esponenziale
+                \end{itemize}
+            \end{column}
+            \begin{column}{0.6\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{ggplot2 line chart 9.pdf}
+                \captionof{figure}{GDP}
+            \end{column}
+        \end{columns}
+    \end{frame}    
+\end{document}
