@@ -4,12 +4,13 @@
 \usetheme{Madrid}
 \usecolortheme{spruce}
 
-\usepackage[utf8]{inputenc} 
+\usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{graphicx}
-\usepackage{xcolor} 
+\usepackage{xcolor}
+\usepackage{caption} % NECESSARIO per \captionof
 
-% Definizione colore personalizzato e applicazione corretta
+% Definizione colore personalizzato
 \definecolor{darkgreen}{RGB}{0,102,51}
 \setbeamercolor{structure}{fg=darkgreen}
 
@@ -20,7 +21,7 @@
     urlcolor=blue
 }
 
-% Mostra solo il numero di pagina nel footer (più pulito)
+% Mostra solo il numero di pagina nel footer
 \setbeamertemplate{footline}[page number]
 
 % --- Informazioni Documento ---
@@ -105,8 +106,7 @@
     \begin{frame}{Grafico interpolato}
         \begin{figure}
             \centering
-            % Assicurati che Grafico1.pdf sia nella stessa cartella
-            \includegraphics[width=0.85\textwidth]{Grafico1.pdf}
+            \includegraphics[width=0.75\textwidth]{Grafico1.pdf}
             \caption{Andamento MPI interpolato (2013--2021)}
         \end{figure}
     \end{frame}
@@ -121,123 +121,105 @@
     \end{frame}
     
     \begin{frame}{Dove eravamo rimasti?}
-		\begin{itemize}
-			\item Scrivere in modo coinciso le domande di ricerca e come vogliamo spiegare l'HDI secondo le variabili
-		\end{itemize}
-		
-	\end{frame}
-	
-	%----------------------
-	\begin{frame}{Variabili d'interesse:}
-		\begin{itemize}
-			\item FDI (\% PIL)→ Investimenti esteri netti in rapporto al PIL
-			\item Accesso elettricità → \% popolazione con elettricità
-			\item Acqua potabile → \% popolazione con accesso base
-			\item Fertilità → Numero medio figli per donna
-			\item PIL pro capite → Reddito medio per abitante
-			\item Mortalità maschile → Morti uomini adulti per 1000
-			\item Mortalità femminile → Morti donne adulte per 1000
-			\item Popolazione totale → Numero abitanti
-		\end{itemize}
-	
-	\end{frame}
+        \begin{itemize}
+            \item Scrivere in modo conciso le domande di ricerca e come vogliamo spiegare l'HDI secondo le variabili.
+        \end{itemize}
+    \end{frame}
+    
+    \begin{frame}{Variabili d'interesse:}
+        \begin{itemize}
+            \item \textbf{FDI (\% PIL)} $\rightarrow$ Investimenti esteri netti
+            \item \textbf{Accesso elettricità} $\rightarrow$ \% popolazione con elettricità
+            \item \textbf{Acqua potabile} $\rightarrow$ \% popolazione con accesso base
+            \item \textbf{Fertilità} $\rightarrow$ Numero medio figli per donna
+            \item \textbf{PIL pro capite} $\rightarrow$ Reddito medio per abitante
+            \item \textbf{Mortalità} $\rightarrow$ Morti adulti per 1000 (maschile/femminile)
+            \item \textbf{Popolazione totale} $\rightarrow$ Numero abitanti
+        \end{itemize}
+    \end{frame}
 
-% --- SLIDE 2: Immagine singola con didascalia (Posizionamento standard) ---
     \begin{frame}{HDI nei paesi dell'Africa subsahariana}
         \begin{figure}
             \centering
             \includegraphics[width=0.7\textwidth]{ggplot2 line chart 1.pdf}
-            \caption{andamento dell'HDI nei paesi presi in esame}
+            \caption{Andamento dell'HDI nei paesi in esame}
         \end{figure}
     \end{frame}
 
-    % --- SLIDE 3: immagine con didascalia ---
     \begin{frame}{GDP per Capita}
         \begin{columns}
-            \begin{column}{0.6\textwidth}
-                Analisi dei differenti GDP tra i paesi in esame:
+            \begin{column}{0.55\textwidth}
+                Analisi dei differenti GDP:
                 \begin{itemize}
-                    \item Sud Africa GDP più elevato rispetto agli altri
-                    \item gli altri hanno un andamento simile pur rimanendo in testa la Nigeria
+                    \item Sud Africa: GDP più elevato.
+                    \item Altri paesi: andamento simile, Nigeria in testa al gruppo.
                 \end{itemize}
             \end{column}
-            \begin{column}{0.4\textwidth}
+            \begin{column}{0.45\textwidth}
                 \centering
                 \includegraphics[width=\textwidth]{ggplot2 line chart 3.pdf}
-                \captionof{figure}{GDP}
+                \captionof{figure}{GDP trend}
             \end{column}
         \end{columns}
     \end{frame}
 
-    % --- SLIDE 4: VS ---
-\begin{frame}{Acqua ed Elettricità }
+    \begin{frame}{Acqua ed Elettricità}
         \begin{columns}
             \begin{column}{0.5\textwidth}
                 \centering
                 \includegraphics[width=\textwidth]{ggplot2 line chart 5.pdf}
-                \captionof{Trend Acqua}
+                \captionof{figure}{Trend Acqua}
             \end{column}
             \begin{column}{0.5\textwidth}
                 \centering
                 \includegraphics[width=\textwidth]{ggplot2 line chart 8.pdf}
-                \captionof{Trend Elettricità}
+                \captionof{figure}{Trend Elettricità}
             \end{column}
         \end{columns}
     \end{frame}
 
-% --- SLIDE 5: Confronto Triplo ---
-    \begin{frame}{Analisi Comparativa: Senegal, Ghana e Nigeria}
-        \begin{columns}[t] % [t] allinea il contenuto delle colonne in alto
-            
-            % Prima Colonna: fertilità
+    \begin{frame}{Analisi Comparativa}
+        \begin{columns}[t]
             \begin{column}{0.32\textwidth}
                 \centering
-                \textbf{Fertilità} \\
-                \vspace{0.2cm}
+                \textbf{\small Fertilità} \\
+                \vspace{0.1cm}
                 \includegraphics[width=\textwidth]{ggplot2 line chart 4.pdf}
-               
             \end{column}
-
-            % Seconda Colonna: tasso di mortalità
             \begin{column}{0.32\textwidth}
                 \centering
-                \textbf{Tasso di mortalità} \\
-                \vspace{0.2cm}
+                \textbf{\small Mortalità} \\
+                \vspace{0.1cm}
                 \includegraphics[width=\textwidth]{ggplot2 line chart 6.pdf}
-                
             \end{column}
-
-            % Terza Colonna: Popolazione
             \begin{column}{0.32\textwidth}
                 \centering
-                \textbf{Popolazione} \\
-                \vspace{0.2cm}
+                \textbf{\small Popolazione} \\
+                \vspace{0.1cm}
                 \includegraphics[width=\textwidth]{ggplot2 line chart 7.pdf}
-                
             \end{column}
-            
         \end{columns}
-
-        \vspace{0.5cm}
+        \vspace{0.4cm}
         \begin{block}{Osservazione}
-            \small pur essendo il primo per GDP il Sud Africa non risulta sempre primo negli altri valori come per esempio la popolazione, ciò rivela che una maggiore ricchezza non significa maggiore tenore di vita
+            \small Pur essendo il primo per GDP, il Sud Africa non domina in tutti gli indicatori (es. popolazione). La ricchezza monetaria non coincide sempre con un migliore tenore di vita multidimensionale.
         \end{block}
     \end{frame}
-    % --- SLIDE 6: investimenti ---
+
     \begin{frame}{Investimenti stranieri}
         \begin{columns}
-            \begin{column}{0.6\textwidth}
-                investimenti effettuati negli anni:
+            \begin{column}{0.5\textwidth}
+                Investimenti effettuati negli anni:
                 \begin{itemize}
-                    \item gli investimenti sono in aumento tranne per il ghana che sono diminuiti
-                    \item anche se il senegal era uno dei paesi più in dietro da questo punto di vista negli ultimi anni ha avuto una crescita esponenziale
+                    \item In aumento ovunque tranne che in Ghana.
+                    \item Il Senegal mostra una crescita esponenziale recente.
                 \end{itemize}
             \end{column}
-            \begin{column}{0.6\textwidth}
+            \begin{column}{0.5\textwidth}
                 \centering
                 \includegraphics[width=\textwidth]{ggplot2 line chart 9.pdf}
-                \captionof{figure}{GDP}
+                \captionof{figure}{FDI Trend}
             \end{column}
         \end{columns}
-    \end{frame}    
+    \end{frame}
+
 \end{document}
