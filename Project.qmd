@@ -11,6 +11,8 @@ install.packages("psych")
 library(psych)
 install.packages("jsonlite")
 library(jsonlite)
+install.packages("ggplot2")
+library(ggplot2)
 hdi.ssa <- fromJSON("hdr-data.json")
 hdi.ssa <- hdi.ssa[, c(2,8,11)]
 names(hdi.ssa)[names(hdi.ssa) == "value"] <- "HDI"
@@ -283,8 +285,8 @@ View(d_pop)
 
 ```{r}
 elet <- read_excel ("accesso elettricità.xlsx")
-elet <- elet[c(1:4),c(-2,-3,-4)]
-elet <- wat[,c(1,8:ncol(wat))]
+elet <- elet[c(1:3),c(-2,-3,-4)]
+elet <- elet[,c(1,8:ncol(elet))]
 names(elet)
 if ("Country Name" %in% names(elet)) {
   names(elet)[names(elet) == "Country Name"] <- "Country.Name"
