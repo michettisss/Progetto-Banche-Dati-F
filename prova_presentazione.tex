@@ -77,13 +77,21 @@
     \end{frame}
 
     % --- SLIDE 4: HDI (Andamento Generale) ---
-    \begin{frame}{HDI nei paesi dell'Africa subsahariana}
-        \begin{figure}
-            \centering
-            \includegraphics[width=0.7\textwidth]{ggplot2 line chart 1.pdf}
-            \caption{Andamento dell'HDI nei paesi presi in esame}
-        \end{figure}
+    \begin{frame}{HDI nei paesi dell'Africa Sub-Sahariana}
+        \begin{columns}
+            \begin{column}{0.5\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{ggplot2 line chart 1.pdf}
+                \captionof{figure}{Andamento HDI Africa Sub-Sahariana/Mondo}
+            \end{column}
+            \begin{column}{0.5\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{ggplot2 line chart 2.pdf}
+                \captionof{figure}{Andamento dell'HDI nei paesi presi in esame}
+            \end{column}
+        \end{columns}
     \end{frame}
+
 
     % --- SLIDE 5: GDP per Capita ---
     \begin{frame}{Analisi del GDP per Capita}
@@ -168,7 +176,7 @@
     \begin{frame}{Sviluppo del Modello}
         L'obiettivo finale della ricerca si articolerà in:
         \begin{itemize}
-            \item \textbf{Costruzione di un modello di regressione lineare} per quantificare il peso di ciascun regressore sull'HDI.
+            \item \textbf{Costruzione di un modello di regressione lineare panel} per quantificare il peso di ciascun regressore sull'HDI.
             \item \textbf{Verifica delle ipotesi}: Analizzare se i fattori infrastrutturali (Acqua/Luce) pesano più dei fattori puramente monetari (GDP/FDI).
             \item \textbf{Analisi dei residui}: Valutare l'efficacia del modello nel prevedere i cambiamenti nei diversi contesti nazionali analizzati.
         \end{itemize}
