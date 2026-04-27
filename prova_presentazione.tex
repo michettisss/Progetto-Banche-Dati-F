@@ -10,7 +10,7 @@
 \usepackage{xcolor}
 \usepackage{caption} 
 
-% Definizione colore personalizzato
+% Definizione colore personalizzato e applicazione
 \definecolor{darkgreen}{RGB}{0,102,51}
 \setbeamercolor{structure}{fg=darkgreen}
 
@@ -21,12 +21,12 @@
     urlcolor=blue
 }
 
-% Mostra solo il numero di pagina nel footer
+% Footer pulito con numero di pagina
 \setbeamertemplate{footline}[page number]
 
 % --- Informazioni Documento ---
 \title{Multidimensional Poverty in Sub-Saharan Africa}
-\subtitle{Analisi e Sviluppo del Modello}
+\subtitle{Analisi Empirica e Variabili di Modello}
 \author{Gruppo F: Bondi, Dal Ben, Michetti, Proietti, Veronese}
 \date{\today}
 
@@ -41,55 +41,54 @@
     \begin{frame}{Recap: Domanda di Ricerca}
         La crescita economica è sufficiente per ridurre la povertà multidimensionale oppure sono necessari interventi mirati sul capitale umano e le infrastrutture?
         \vspace{0.5cm}
-        \begin{block}{Obiettivo del Modello}
-            Identificare quali fattori (regressori) influenzano maggiormente l'indice di sviluppo umano (HDI) e la povertà nei paesi selezionati.
+        \begin{block}{Obiettivo dello studio}
+            Analizzare l'impatto dei fattori socio-economici sull'indice di sviluppo umano nei contesti dell'Africa Subsahariana.
         \end{block}
     \end{frame}
     
-    % --- SLIDE 2: Scelta dei Paesi ---
-    \begin{frame}{Scelta dei Paesi: Senegal, Ghana, Nigeria e Sud Africa}
-        La scelta è ricaduta su questi paesi per le seguenti ragioni:
+    % --- SLIDE 2: Spiegazione Scelta Paesi ---
+    \begin{frame}{Perché questi paesi? (Senegal, Ghana, Nigeria, Sud Africa)}
+        I paesi sono stati selezionati per rappresentare la diversità del continente:
         \begin{itemize}
-            \item \textbf{Eterogeneità:} Diversi livelli di povertà multidimensionale e strutture economiche.
-            \item \textbf{Rilevanza Regionale:} Rappresentano economie chiave dell'Africa Subsahariana con differenti trend demografici.
-            \item \textbf{Politiche Pubbliche:} Approcci diversificati nella gestione delle risorse e dei servizi sociali.
-            \item \textbf{Dati:} Disponibilità di serie storiche comparabili.
+            \item \textbf{Eterogeneità:} Diversi stadi di sviluppo multidimensionale.
+            \item \textbf{Strutture Economiche:} Confronto tra economie basate sulle risorse e mercati più diversificati.
+            \item \textbf{Disponibilità Dati:} Presenza di dataset comparabili tra le fonti World Bank e Our World in Data.
         \end{itemize}
     \end{frame}
     
-    % --- SLIDE 3: Variabili del Modello ---
-    \begin{frame}{Variabili: Dipendente e Regressori}
+    % --- SLIDE 3: Spiegazione Scelta Regressori e Variabile Dipendente ---
+    \begin{frame}{Variabili d'interesse e Modello}
+        Abbiamo selezionato l'**HDI** (o MPI) come variabile dipendente, spiegata dai seguenti regressori:
         \begin{itemize}
-            \item \textbf{Variabile Dipendente:} HDI (Human Development Index) / MPI.
-            \item \textbf{Regressori (Variabili Indipendenti):}
-            \begin{itemize}
-                \item \textbf{Economici:} PIL pro capite, FDI (\% PIL).
-                \item \textbf{Infrastrutturali:} Accesso all'elettricità, Acqua potabile.
-                \item \textbf{Demografici:} Fecondità, Popolazione totale, Tasso di mortalità (maschile e femminile).
-            \end{itemize}
+            \item \textbf{FDI (\% PIL)} $\rightarrow$ Investimenti esteri netti in rapporto al PIL.
+            \item \textbf{Accesso elettricità} $\rightarrow$ \% popolazione con elettricità.
+            \item \textbf{Acqua potabile} $\rightarrow$ \% popolazione con accesso base.
+            \item \textbf{Fertilità} $\rightarrow$ Numero medio figli per donna.
+            \item \textbf{PIL pro capite} $\rightarrow$ Reddito medio per abitante.
+            \item \textbf{Mortalità (M/F)} $\rightarrow$ Morti adulti per 1000 abitanti.
+            \item \textbf{Popolazione totale} $\rightarrow$ Numero abitanti.
         \end{itemize}
     \end{frame}
 
-    % --- SLIDE 4: Grafico HDI ---
-    \begin{frame}{Andamento Variabile Dipendente: HDI}
+    % --- SLIDE 4: HDI (Andamento Generale) ---
+    \begin{frame}{HDI nei paesi dell'Africa subsahariana}
         \begin{figure}
             \centering
-            \includegraphics[width=0.75\textwidth]{ggplot2 line chart 1.pdf}
-            \caption{Evoluzione dell'HDI}
+            \includegraphics[width=0.7\textwidth]{ggplot2 line chart 1.pdf}
+            \caption{Andamento dell'HDI nei paesi presi in esame}
         \end{figure}
     \end{frame}
 
-    % --- SLIDE 5: Grafico GDP ---
-    \begin{frame}{Regressore: GDP per Capita}
+    % --- SLIDE 5: GDP per Capita ---
+    \begin{frame}{Analisi del GDP per Capita}
         \begin{columns}
-            \begin{column}{0.5\textwidth}
+            \begin{column}{0.55\textwidth}
                 \begin{itemize}
-                    \item Sud Africa mantiene il GDP più elevato.
-                    \item Nigeria segue con un trend stabile.
-                    \item Ghana e Senegal mostrano crescite costanti ma su livelli inferiori.
+                    \item Il Sud Africa presenta un GDP nettamente più elevato rispetto agli altri.
+                    \item Nigeria, Ghana e Senegal mostrano un andamento simile, con la Nigeria che guida il gruppo dei tre.
                 \end{itemize}
             \end{column}
-            \begin{column}{0.5\textwidth}
+            \begin{column}{0.45\textwidth}
                 \centering
                 \includegraphics[width=\textwidth]{ggplot2 line chart 3.pdf}
                 \captionof{figure}{Trend GDP}
@@ -98,69 +97,75 @@
     \end{frame}
 
     % --- SLIDE 6: Acqua ed Elettricità ---
-    \begin{frame}{Regressori: Infrastrutture (Acqua ed Elettricità)}
+    \begin{frame}{Infrastrutture: Acqua ed Elettricità}
         \begin{columns}
             \begin{column}{0.5\textwidth}
                 \centering
-                \includegraphics[width=0.9\textwidth]{ggplot2 line chart 5.pdf}
-                \captionof{figure}{Accesso all'Acqua}
+                \includegraphics[width=\textwidth]{ggplot2 line chart 5.pdf}
+                \captionof{figure}{Trend Accesso Acqua}
             \end{column}
             \begin{column}{0.5\textwidth}
                 \centering
-                \includegraphics[width=0.9\textwidth]{ggplot2 line chart 8.pdf}
-                \captionof{figure}{Accesso all'Elettricità}
+                \includegraphics[width=\textwidth]{ggplot2 line chart 8.pdf}
+                \captionof{figure}{Trend Elettricità}
             \end{column}
         \end{columns}
     \end{frame}
 
-    % --- SLIDE 7: Demografia e Salute ---
-    \begin{frame}{Regressori: Demografia e Salute}
+    % --- SLIDE 7: Analisi Comparativa (Fertilità, Mortalità, Popolazione) ---
+    \begin{frame}{Analisi Comparativa: Demografia e Salute}
         \begin{columns}[t]
             \begin{column}{0.32\textwidth}
                 \centering
-                \textbf{\small Fecondità} \\
+                \textbf{\small Fertilità} \\
+                \vspace{0.1cm}
                 \includegraphics[width=\textwidth]{ggplot2 line chart 4.pdf}
             \end{column}
             \begin{column}{0.32\textwidth}
                 \centering
                 \textbf{\small Mortalità} \\
+                \vspace{0.1cm}
                 \includegraphics[width=\textwidth]{ggplot2 line chart 6.pdf}
             \end{column}
             \begin{column}{0.32\textwidth}
                 \centering
                 \textbf{\small Popolazione} \\
+                \vspace{0.1cm}
                 \includegraphics[width=\textwidth]{ggplot2 line chart 7.pdf}
             \end{column}
         \end{columns}
+        \vspace{0.4cm}
+        \begin{block}{Osservazione Chiave}
+            \small Pur avendo il GDP più alto, il Sud Africa non primeggia in tutti gli indicatori. Questo conferma che la sola ricchezza monetaria non garantisce automaticamente un tenore di vita superiore in ogni dimensione.
+        \end{block}
     \end{frame}
 
-    % --- SLIDE 8: Investimenti ---
-    \begin{frame}{Regressore: Investimenti Stranieri (FDI)}
+    % --- SLIDE 8: Investimenti Stranieri ---
+    \begin{frame}{Investimenti Stranieri (FDI)}
         \begin{columns}
-            \begin{column}{0.5\textwidth}
+            \begin{column}{0.55\textwidth}
+                Analisi degli investimenti netti:
                 \begin{itemize}
-                    \item Trend in crescita per la maggior parte dei paesi.
-                    \item Focus sul Senegal: crescita esponenziale negli ultimi anni.
-                    \item Ghana in controtendenza con una recente diminuzione.
+                    \item Trend generale in aumento, ad eccezione del Ghana che mostra una flessione.
+                    \item Caso Senegal: crescita esponenziale negli ultimi anni della serie storica.
                 \end{itemize}
             \end{column}
-            \begin{column}{0.5\textwidth}
+            \begin{column}{0.45\textwidth}
                 \centering
                 \includegraphics[width=\textwidth]{ggplot2 line chart 9.pdf}
-                \captionof{figure}{FDI (\% GDP)}
+                \captionof{figure}{FDI (\% PIL)}
             \end{column}
         \end{columns}
     \end{frame}
 
     % --- SLIDE FINALE: Sviluppo del Modello ---
-    \begin{frame}{Sviluppo del Modello: Prossimi Passi}
-        Il modello verrà implementato seguendo queste fasi:
-        \begin{enumerate}
-            \item \textbf{Analisi di Correlazione:} Verificare il legame statistico tra HDI e i singoli regressori.
-            \item \textbf{Regressione Multipla:} Stimare l'impatto combinato delle variabili indipendenti sulla povertà multidimensionale.
-            \item \textbf{Diagnostica:} Controllare per multicollinearità, eteroschedasticità e autocorrelazione.
-            \item \textbf{Interpretazione Politica:} Tradurre i coefficienti del modello in raccomandazioni (?) per policy mirate.
-        \end{enumerate}
+    \begin{frame}{Sviluppo del Modello}
+        L'obiettivo finale della ricerca si articolerà in:
+        \begin{itemize}
+            \item \textbf{Costruzione di un modello di regressione lineare} per quantificare il peso di ciascun regressore sull'HDI.
+            \item \textbf{Verifica delle ipotesi}: Analizzare se i fattori infrastrutturali (Acqua/Luce) pesano più dei fattori puramente monetari (GDP/FDI).
+            \item \textbf{Analisi dei residui}: Valutare l'efficacia del modello nel prevedere i cambiamenti nei diversi contesti nazionali analizzati.
+        \end{itemize}
     \end{frame}
 
 \end{document}
