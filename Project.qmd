@@ -302,7 +302,31 @@ fert_long %>%
 
 Commento tabella: La tabella mostra le statistiche descrittive del tasso di fertilità per Nigeria, Ghana, Senegal, Sudafrica e l'Africa Sub-Sahariana. Il Sudafrica ha una media di tasso di fertilità di 2.5 figli per donna, con una deviazione standard di 0.3, un minimo di 2.0 e un massimo di 3.0, basato su 34 osservazioni (anni). Il Ghana ha una media di tasso di fertilità di 4.0 figli per donna, con una deviazione standard di 0.5, un minimo di 3.5 e un massimo di 4.5, basato su 34 osservazioni (anni). Il Senegal ha una media di tasso di fertilità di 5.0 figli per donna, con una deviazione standard di 0.6, un minimo di 4.5 e un massimo di 5.5, basato su 34 osservazioni (anni). La Nigeria ha una media di tasso di fertilità di 6.0 figli per donna, con una deviazione standard di 0.7, un minimo di 5.5 e un massimo di 6.5, basato su 34 osservazioni (anni). L'Africa Sub-Sahariana nel suo complesso ha una media di tasso di fertilità di 5.0 figli per donna, con una deviazione standard di 1.0, un minimo di 4.0 e un massimo di 6.0, basato su 34 osservazioni (anni). Questi dati evidenziano le differenze nei tassi di fertilità tra i singoli paesi e l'Africa Sub-Sahariana nel suo complesso.
 
-
+Statistiche descrittive per anno:
+```{r}
+fert_long %>%
+  group_by(year) %>%
+  summarise(
+    Media = mean(Fertility, na.rm = TRUE),
+    SD = sd(Fertility, na.rm = TRUE),
+    Min = min(Fertility, na.rm = TRUE),
+    Max = max(Fertility, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Statistiche Fecondità per Paese",
+    subtitle = "Confronto tra aree geografiche"
+  ) %>%
+  fmt_number(
+    columns = c(Media, SD, Min, Max),
+    decimals = 3
+  ) %>%
+  cols_label(
+    year = "Anno",
+    SD = "Dev. Standard"
+  )
+```
 
 # ACQUA
 ```{r}
