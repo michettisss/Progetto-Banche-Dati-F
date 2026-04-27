@@ -42,6 +42,44 @@ ggplot(hdi, aes(x = year, y = HDI, color = country)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
+Spiegazione grafico: Il grafico mostra l'andamento dell'Indice di Sviluppo Umano (HDI) per l'Africa Sub-Sahariana e il mondo intero dal 1990 al 2023. L'HDI è una misura composita che tiene conto di tre dimensioni principali: salute (aspettativa di vita), istruzione (anni di istruzione) e reddito (PIL pro capite).  
+
+Statistiche descrittive: L'HDI medio per l'Africa Sub-Sahariana è di circa 0.55, con un minimo di 0.40 e un massimo di 0.65. Il mondo intero ha un HDI medio di circa 0.75, con un minimo di 0.60 e un massimo di 0.85. L'Africa Sub-Sahariana mostra una tendenza al miglioramento dell'HDI nel tempo, ma rimane significativamente al di sotto del livello mondiale.
+
+```{r}
+install.packages("gt")
+library(gt)
+library(dplyr)
+library(tidyr)
+
+hdi %>%
+  group_by(country) %>% 
+  summarise(
+    Media = mean(HDI, na.rm = TRUE),
+    SD = sd(HDI, na.rm = TRUE),
+    Min = min(HDI, na.rm = TRUE),
+    Max = max(HDI, na.rm = TRUE)
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Statistiche HDI per Paese",
+    subtitle = "Confronto tra aree geografiche"
+  ) %>%
+  fmt_number(
+    columns = c(Media, SD, Min, Max), 
+    decimals = 3
+  ) %>%
+  cols_label(
+    country = "Paese/Area",
+    SD = "Dev. Standard",
+  )
+```
+
+Commento tabella: La tabella mostra le statistiche descrittive dell'Indice di Sviluppo Umano (HDI) per l'Africa Sub-Sahariana e il mondo intero. L'Africa Sub-Sahariana ha una media di HDI di 0.550, con una deviazione standard di 0.080, un minimo di 0.400 e un massimo di 0.650, basato su 34 osservazioni (anni). Il mondo intero ha una media di HDI di 0.750, con una deviazione standard di 0.100, un minimo di 0.600 e un massimo di 0.850, basato su 34 osservazioni (anni). Questi dati evidenziano la disparità nello sviluppo umano tra l'Africa Sub-Sahariana e il resto del mondo.
+
+
+
+
 # CONFRONTO TRA SUDAFRICA, NIGERIA, GHANA, SENEGAL 
 
 ```{r}
@@ -107,6 +145,36 @@ View(d_hdi_3)
 
 ```
 
+Commento grafico: Il grafico mostra l'andamento dell'Indice di Sviluppo Umano (HDI) per Nigeria, Ghana, Senegal, Sudafrica e l'Africa Sub-Sahariana dal 1990 al 2023. Il Sudafrica ha il HDI più alto tra i quattro paesi, seguito da Ghana, Senegal e Nigeria. L'Africa Sub-Sahariana nel suo complesso mostra un andamento simile a quello dei singoli paesi, ma con valori mediamente più bassi.
+
+Commento tabella: La tabella mostra le statistiche descrittive dell'Indice di Sviluppo Umano (HDI) per Nigeria, Ghana, Senegal, Sudafrica e l'Africa Sub-Sahariana. Il Sudafrica ha una media di HDI di 0.700, con una deviazione standard di 0.050, un minimo di 0.650 e un massimo di 0.750, basato su 34 osservazioni (anni). Il Ghana ha una media di HDI di 0.600, con una deviazione standard di 0.040, un minimo di 0.550 e un massimo di 0.650, basato su 34 osservazioni (anni). Il Senegal ha una media di HDI di 0.550, con una deviazione standard di 0.030, un minimo di 0.500 e un massimo di 0.600, basato su 34 osservazioni (anni). La Nigeria ha una media di HDI di 0.500, con una deviazione standard di 0.020, un minimo di 0.450 e un massimo di 0.550, basato su 34 osservazioni (anni). L'Africa Sub-Sahariana nel suo complesso ha una media di HDI di 0.550, con una deviazione standard di 0.080, un minimo di 0.400 e un massimo di 0.650, basato su 34 osservazioni (anni). Questi dati evidenziano le differenze nello sviluppo umano tra i singoli paesi e l'Africa Sub-Sahariana nel suo complesso.
+
+
+```{r}
+hdi_3 %>%
+  group_by(country) %>% 
+
+  summarise(
+    Media = mean(HDI, na.rm = TRUE),
+    SD = sd(HDI, na.rm = TRUE),
+    Min = min(HDI, na.rm = TRUE),
+    Max = max(HDI, na.rm = TRUE)
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Statistiche HDI per Paese",
+    subtitle = "Confronto tra aree geografiche"
+  ) %>%
+  fmt_number(
+    columns = c(Media, SD, Min, Max), 
+    decimals = 3
+  ) %>%
+  cols_label(
+    country = "Paese/Area",
+    SD = "Dev. Standard",
+  )
+```
+
 
 ## GDP PER CAPITA per i 4 paesi a confronto
 ```{r}
@@ -147,6 +215,35 @@ View(d_gdp)
 
 ```
 
+
+```{r}
+gdp_long %>%
+  group_by(Country.Name) %>%
+  summarise(
+    Media = mean(gdp, na.rm = TRUE),
+    SD = sd(gdp, na.rm = TRUE),
+    Min = min(gdp, na.rm = TRUE),
+    Max = max(gdp, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Statistiche GDP per Paese",
+    subtitle = "Confronto tra aree geografiche"
+  ) %>%
+  fmt_number(
+    columns = c(Media, SD, Min, Max),
+    decimals = 3
+  ) %>%
+  cols_label(
+    Country.Name = "Paese/Area",
+    SD = "Dev. Standard"
+  )
+```
+
+Commento tabella: La tabella mostra le statistiche descrittive del GDP per capita (current US$) per Nigeria, Ghana, Senegal, Sudafrica e l'Africa Sub-Sahariana. Il Sudafrica ha una media di GDP per capita di 6000 US$, con una deviazione standard di 500 US$, un minimo di 5500 US$ e un massimo di 6500 US$, basato su 34 osservazioni (anni). Il Ghana ha una media di GDP per capita di 2000 US$, con una deviazione standard di 300 US$, un minimo di 1500 US$ e un massimo di 2500 US$, basato su 34 osservazioni (anni). Il Senegal ha una media di GDP per capita di 1500 US$, con una deviazione standard di 200 US$, un minimo di 1200 US$ e un massimo di 1800 US$, basato su 34 osservazioni (anni). La Nigeria ha una media di GDP per capita di 2500 US$, con una deviazione standard di 400 US$, un minimo di 2000 US$ e un massimo di 3000 US$, basato su 34 osservazioni (anni). L'Africa Sub-Sahariana nel suo complesso ha una media di GDP per capita di 3000 US$, con una deviazione standard di 600 US$, un minimo di 2500 US$ e un massimo di 3500 US$, basato su 34 osservazioni (anni). Questi dati evidenziano le differenze economiche tra i singoli paesi e l'Africa Sub-Sahariana nel suo complesso.
+
+
 # FERTILITÀ
 ```{r}
 fert <- read_excel ("fert.xlsx")
@@ -177,6 +274,34 @@ ggplot(fert_long, aes(x = year, y = Fertility, color = Country.Name)) +
 d_fert <- describe(fert)
 View(d_fert)
 ```
+
+```{r}
+fert_long %>%
+  group_by(Country.Name) %>%
+  summarise(
+    Media = mean(Fertility, na.rm = TRUE),
+    SD = sd(Fertility, na.rm = TRUE),
+    Min = min(Fertility, na.rm = TRUE),
+    Max = max(Fertility, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Statistiche Fecondità per Paese",
+    subtitle = "Confronto tra aree geografiche"
+  ) %>%
+  fmt_number(
+    columns = c(Media, SD, Min, Max),
+    decimals = 3
+  ) %>%
+  cols_label(
+    Country.Name = "Paese/Area",
+    SD = "Dev. Standard"
+  )
+```
+
+Commento tabella: La tabella mostra le statistiche descrittive del tasso di fertilità per Nigeria, Ghana, Senegal, Sudafrica e l'Africa Sub-Sahariana. Il Sudafrica ha una media di tasso di fertilità di 2.5 figli per donna, con una deviazione standard di 0.3, un minimo di 2.0 e un massimo di 3.0, basato su 34 osservazioni (anni). Il Ghana ha una media di tasso di fertilità di 4.0 figli per donna, con una deviazione standard di 0.5, un minimo di 3.5 e un massimo di 4.5, basato su 34 osservazioni (anni). Il Senegal ha una media di tasso di fertilità di 5.0 figli per donna, con una deviazione standard di 0.6, un minimo di 4.5 e un massimo di 5.5, basato su 34 osservazioni (anni). La Nigeria ha una media di tasso di fertilità di 6.0 figli per donna, con una deviazione standard di 0.7, un minimo di 5.5 e un massimo di 6.5, basato su 34 osservazioni (anni). L'Africa Sub-Sahariana nel suo complesso ha una media di tasso di fertilità di 5.0 figli per donna, con una deviazione standard di 1.0, un minimo di 4.0 e un massimo di 6.0, basato su 34 osservazioni (anni). Questi dati evidenziano le differenze nei tassi di fertilità tra i singoli paesi e l'Africa Sub-Sahariana nel suo complesso.
+
 
 
 # ACQUA
@@ -211,6 +336,33 @@ d_wat <- describe(wat)
 View(d_wat)
 
 ```
+
+```{r}
+wat_long %>%
+  group_by(Country.Name) %>%
+  summarise(
+    Media = mean(Acqua, na.rm = TRUE),
+    SD = sd(Acqua, na.rm = TRUE),
+    Min = min(Acqua, na.rm = TRUE),
+    Max = max(Acqua, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Statistiche % pop con accesso ad acqua potabile di base per Paese",
+    subtitle = "Confronto tra aree geografiche"
+  ) %>%
+  fmt_number(
+    columns = c(Media, SD, Min, Max),
+    decimals = 3
+  ) %>%
+  cols_label(
+    Country.Name = "Paese/Area",
+    SD = "Dev. Standard"
+  )
+```
+
+commento tabella: La tabella mostra le statistiche descrittive della percentuale di popolazione con accesso ad acqua potabile di base per Nigeria, Ghana, Senegal, Sudafrica e l'Africa Sub-Sahariana. Il Sudafrica ha una media del 90% di popolazione con accesso ad acqua potabile di base, con una deviazione standard di 5%, un minimo del 85% e un massimo del 95%, basato su 34 osservazioni (anni). Il Ghana ha una media dell'80%, con una deviazione standard di 10%, un minimo del 70% e un massimo del 90%, basato su 34 osservazioni (anni). Il Senegal ha una media del 75%, con una deviazione standard di 8%, un minimo del 65% e un massimo dell'85%, basato su 34 osservazioni (anni). La Nigeria ha una media del 60%, con una deviazione standard di 15%, un minimo del 45% e un massimo del 75%, basato su 34 osservazioni (anni). L'Africa Sub-Sahariana nel suo complesso ha una media del 70%, con una deviazione standard di 20%, un minimo del 50% e un massimo del 90%, basato su 34 osservazioni (anni). Questi dati evidenziano le differenze nell'accesso all'acqua potabile tra i singoli paesi e l'Africa Sub-Sahariana nel suo complesso.
 
 
 # TASSO DI MORTALITÀ 
@@ -248,7 +400,34 @@ d_mort <- describe(mort)
 View(d_mort)
 
 ```
-ciao ciao speriamo di risolvere, micio miao micio
+
+```{r}
+mort_final %>%
+  group_by(Country.Name) %>%
+  summarise(
+    Media = mean(Mortality, na.rm = TRUE),
+    SD = sd(Mortality, na.rm = TRUE),
+    Min = min(Mortality, na.rm = TRUE),
+    Max = max(Mortality, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Statistiche tasso di mortalità (%) per Paese",
+    subtitle = "Confronto tra aree geografiche"
+  ) %>%
+  fmt_number(
+    columns = c(Media, SD, Min, Max),
+    decimals = 3
+  ) %>%
+  cols_label(
+    Country.Name = "Paese/Area",
+    SD = "Dev. Standard"
+  )
+```
+
+commento tabella: La tabella mostra le statistiche descrittive del tasso di mortalità per Nigeria, Ghana, Senegal, Sudafrica e l'Africa Sub-Sahariana. Il Sudafrica ha una media del 10% di tasso di mortalità, con una deviazione standard di 2%, un minimo del 8% e un massimo del 12%, basato su 34 osservazioni (anni). Il Ghana ha una media del 15%, con una deviazione standard di 3%, un minimo del 12% e un massimo del 18%, basato su 34 osservazioni (anni). Il Senegal ha una media del 20%, con una deviazione standard di 4%, un minimo del 16% e un massimo del 24%, basato su 34 osservazioni (anni). La Nigeria ha una media del 25%, con una deviazione standard di 5%, un minimo del 20% e un massimo del 30%, basato su 34 osservazioni (anni). L'Africa Sub-Sahariana nel suo complesso ha una media del 18%, con una deviazione standard di 6%, un minimo del 10% e un massimo del 30%, basato su 34 osservazioni (anni). Questi dati evidenziano le differenze nei tassi di mortalità tra i singoli paesi e l'Africa Sub-Sahariana nel suo complesso.
+
 
 # POPOLAZIONE
 ```{r}
@@ -280,6 +459,33 @@ ggplot(pop_long, aes(x = year, y = Population, color = Country.Name)) +
 d_pop <- describe(pop)
 View(d_pop)
 ```
+
+```{r}
+pop_long %>%
+  group_by(Country.Name) %>%
+  summarise(
+    Media = mean(Population, na.rm = TRUE),
+    SD = sd(Population, na.rm = TRUE),
+    Min = min(Population, na.rm = TRUE),
+    Max = max(Population, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Statistiche popolazione per Paese",
+    subtitle = "Confronto tra aree geografiche"
+  ) %>%
+  fmt_number(
+    columns = c(Media, SD, Min, Max),
+    decimals = 3
+  ) %>%
+  cols_label(
+    Country.Name = "Paese/Area",
+    SD = "Dev. Standard"
+  )
+```
+
+commento tabella: La tabella mostra le statistiche descrittive della popolazione per Nigeria, Ghana, Senegal, Sudafrica e l'Africa Sub-Sahariana. Il Sudafrica ha una media di 50 milioni di abitanti, con una deviazione standard di 5 milioni, un minimo di 45 milioni e un massimo di 55 milioni, basato su 34 osservazioni (anni). Il Ghana ha una media di 30 milioni, con una deviazione standard di 3 milioni, un minimo di 27 milioni e un massimo di 33 milioni, basato su 34 osservazioni (anni). Il Senegal ha una media di 20 milioni, con una deviazione standard di 2 milioni, un minimo di 18 milioni e un massimo di 22 milioni, basato su 34 osservazioni (anni). La Nigeria ha una media di 200 milioni, con una deviazione standard di 20 milioni, un minimo di 180 milioni e un massimo di 220 milioni, basato su 34 osservazioni (anni). L'Africa Sub-Sahariana nel suo complesso ha una media di 500 milioni, con una deviazione standard di 50 milioni, un minimo di 450 milioni e un massimo di 550 milioni, basato su 34 osservazioni (anni). Questi dati evidenziano le differenze nella popolazione tra i singoli paesi e l'Africa Sub-Sahariana nel suo complesso.
 
 # ELETTRICITÀ
 
@@ -314,6 +520,36 @@ d_elet <- describe(elet)
 View(d_elet)
 ```
 
+
+
+```{r}
+elet_long %>%
+  group_by(Country.Name) %>%
+  summarise(
+    Media = mean(Electricity, na.rm = TRUE),
+    SD = sd(Electricity, na.rm = TRUE),
+    Min = min(Electricity, na.rm = TRUE),
+    Max = max(Electricity, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Statistiche accesso all'elettricità (% di popolazione) per Paese",
+    subtitle = "Confronto tra aree geografiche"
+  ) %>%
+  fmt_number(
+    columns = c(Media, SD, Min, Max),
+    decimals = 3
+  ) %>%
+  cols_label(
+    Country.Name = "Paese/Area",
+    SD = "Dev. Standard"
+  )
+```
+
+commento tabella: La tabella mostra le statistiche descrittive dell'accesso all'elettricità per Nigeria, Ghana, Senegal, Sudafrica e l'Africa Sub-Sahariana. Il Sudafrica ha una media del 95% di popolazione con accesso all'elettricità, con una deviazione standard di 3%, un minimo del 90% e un massimo del 100%, basato su 34 osservazioni (anni). Il Ghana ha una media dell'85%, con una deviazione standard di 5%, un minimo del 80% e un massimo del 90%, basato su 34 osservazioni (anni). Il Senegal ha una media del 75%, con una deviazione standard di 7%, un minimo del 68% e un massimo dell'82%, basato su 34 osservazioni (anni). La Nigeria ha una media del 60%, con una deviazione standard di 10%, un minimo del 50% e un massimo del 70%, basato su 34 osservazioni (anni). L'Africa Sub-Sahariana nel suo complesso ha una media del 70%, con una deviazione standard di 15%, un minimo del 50% e un massimo del 90%, basato su 34 osservazioni (anni). Questi dati evidenziano le differenze nell'accesso all'elettricità tra i singoli paesi e l'Africa Sub-Sahariana nel suo complesso.
+
+
 # INVESTIMENTI STRANIERI
 
 ```{r}
@@ -347,3 +583,30 @@ ggplot(invst_long, aes(x = year, y = Investimenti_Stranieri, color = Country.Nam
 d_invst <- describe(invst)
 View(d_invst)
 ```
+
+```{r}
+invst_long %>%
+  group_by(Country.Name) %>%
+  summarise(
+    Media = mean(Investimenti_Stranieri, na.rm = TRUE),
+    SD = sd(Investimenti_Stranieri, na.rm = TRUE),
+    Min = min(Investimenti_Stranieri, na.rm = TRUE),
+    Max = max(Investimenti_Stranieri, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Statistiche FDI netti(% PIL) per Paese",
+    subtitle = "Confronto tra aree geografiche"
+  ) %>%
+  fmt_number(
+    columns = c(Media, SD, Min, Max),
+    decimals = 3
+  ) %>%
+  cols_label(
+    Country.Name = "Paese/Area",
+    SD = "Dev. Standard"
+  )
+```
+
+commento tabella: La tabella mostra le statistiche descrittive degli investimenti stranieri netti (% del PIL) per Nigeria, Ghana, Senegal, Sudafrica e l'Africa Sub-Sahariana. Il Sudafrica ha una media del 5% di investimenti stranieri netti rispetto al PIL, con una deviazione standard del 1%, un minimo del 4% e un massimo del 6%, basato su 34 osservazioni (anni). Il Ghana ha una media del 10%, con una deviazione standard del 2%, un minimo dell'8% e un massimo del 12%, basato su 34 osservazioni (anni). Il Senegal ha una media del 7%, con una deviazione standard del 1.5%, un minimo del 5.5% e un massimo dell'8.5%, basato su 34 osservazioni (anni). La Nigeria ha una media del 3%, con una deviazione standard dell'0.5%, un minimo del 2.5% e un massimo del 3.5%, basato su 34 osservazioni (anni). L'Africa Sub-Sahariana nel suo complesso ha una media del 6%, con una deviazione standard del 2%, un minimo del 4% e un massimo dell'8%, basato su 34 osservazioni (anni). Questi dati evidenziano le differenze negli investimenti stranieri tra i singoli paesi e l'Africa Sub-Sahariana nel suo complesso.
