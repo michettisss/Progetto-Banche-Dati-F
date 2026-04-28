@@ -83,20 +83,6 @@ Commento tabella: La tabella mostra le statistiche descrittive dell'Indice di Sv
 # CONFRONTO TRA SUDAFRICA, NIGERIA, GHANA, SENEGAL 
 
 ```{r}
-#NIGERIA
-hdi.nga <- fromJSON("hdi.NGA.json")
-hdi.nga <- hdi.nga[, c(2,8,11)]
-names(hdi.nga)[names(hdi.nga) == "value"] <- "HDI"
-hdi.nga$year <- as.integer(hdi.nga$year)
-hdi.nga$HDI <- as.numeric(hdi.nga$HDI)
-
-#GHANA
-hdi.gha <- fromJSON("hdi.gha.json")
-hdi.gha <- hdi.gha[, c(2,8,11)]
-names(hdi.gha)[names(hdi.gha) == "value"] <- "HDI"
-hdi.gha$year <- as.integer(hdi.gha$year)
-hdi.gha$HDI <- as.numeric(hdi.gha$HDI)
-
 #SENEGAL
 hdi.sen <- fromJSON("hdi.sen.json")
 hdi.sen <- hdi.sen[, c(2,8,11)]
@@ -104,7 +90,6 @@ names(hdi.sen)[names(hdi.sen) == "value"] <- "HDI"
 hdi.sen$year <- as.integer(hdi.sen$year)
 hdi.sen$HDI <- as.numeric(hdi.sen$HDI)
 
-#SUDAFRICA
 #NIGERIA
 hdi.nga <- fromJSON("hdi.NGA.json")
 hdi.nga <- hdi.nga[, c(2,8,11)]
@@ -119,7 +104,7 @@ names(hdi.gha)[names(hdi.gha) == "value"] <- "HDI"
 hdi.gha$year <- as.integer(hdi.gha$year)
 hdi.gha$HDI <- as.numeric(hdi.gha$HDI)
 
-#SENEGAL
+#SUDAFRICA
 hdi.zaf <- fromJSON("hdi.zaf.json")
 hdi.zaf <- hdi.zaf[, c(2,8,11)]
 names(hdi.zaf)[names(hdi.zaf) == "value"] <- "HDI"
@@ -633,4 +618,4 @@ invst_long %>%
   )
 ```
 
-commento tabella: La tabella mostra le statistiche descrittive degli investimenti stranieri netti (% del PIL) per Nigeria, Ghana, Senegal, Sudafrica e l'Africa Sub-Sahariana. Il Sudafrica ha una media del 5% di investimenti stranieri netti rispetto al PIL, con una deviazione standard del 1%, un minimo del 4% e un massimo del 6%, basato su 34 osservazioni (anni). Il Ghana ha una media del 10%, con una deviazione standard del 2%, un minimo dell'8% e un massimo del 12%, basato su 34 osservazioni (anni). Il Senegal ha una media del 7%, con una deviazione standard del 1.5%, un minimo del 5.5% e un massimo dell'8.5%, basato su 34 osservazioni (anni). La Nigeria ha una media del 3%, con una deviazione standard dell'0.5%, un minimo del 2.5% e un massimo del 3.5%, basato su 34 osservazioni (anni). L'Africa Sub-Sahariana nel suo complesso ha una media del 6%, con una deviazione standard del 2%, un minimo del 4% e un massimo dell'8%, basato su 34 osservazioni (anni). Questi dati evidenziano le differenze negli investimenti stranieri tra i singoli paesi e l'Africa Sub-Sahariana nel suo complesso.
+Commento tabella: La tabella mostra le statistiche descrittive degli investimenti stranieri netti (% del PIL) per Nigeria, Ghana, Senegal, Sudafrica e l'Africa Sub-Sahariana. Il Sudafrica ha una media del 5% di investimenti stranieri netti rispetto al PIL, con una deviazione standard del 1%, un minimo del 4% e un massimo del 6%, basato su 34 osservazioni (anni). Il Ghana ha una media del 10%, con una deviazione standard del 2%, un minimo dell'8% e un massimo del 12%, basato su 34 osservazioni (anni). Il Senegal ha una media del 7%, con una deviazione standard del 1.5%, un minimo del 5.5% e un massimo dell'8.5%, basato su 34 osservazioni (anni). La Nigeria ha una media del 3%, con una deviazione standard dell'0.5%, un minimo del 2.5% e un massimo del 3.5%, basato su 34 osservazioni (anni). L'Africa Sub-Sahariana nel suo complesso ha una media del 6%, con una deviazione standard del 2%, un minimo del 4% e un massimo dell'8%, basato su 34 osservazioni (anni). Questi dati evidenziano le differenze negli investimenti stranieri tra i singoli paesi e l'Africa Sub-Sahariana nel suo complesso.
