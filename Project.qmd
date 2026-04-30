@@ -734,6 +734,16 @@ model_social <- plm(HDI ~ Mortality + Fertility + Acqua,
 summary(model_social)
 ```
 
+# Modello unico
+
+```{r}
+model_unico <- plm(HDI ~ log(gdp) + Mortality + Population + Investimenti_Stranieri,
+                   data = pdata, model = "within")
+
+summary(model_unico)
+fixed_effects <- fixef(model_unico)
+```
+
 
 # Comparazione modelli
 ```{r}
@@ -757,3 +767,22 @@ library(modelsummary)
 
 modelsummary(model)
 ```
+
+
+
+# idee
+
+1- fixed effects + interpretazione FE (con tabella dei fixed effects per paese)
+a parità di tutti i regressori qual è il paese che performa meglio in termini di HDI e quale peggio? 
+"a parità di tutti i regressori l'HDI in Nigeria è più alto o più basso rispetto al Ghana? E rispetto al Senegal? E rispetto al Sudafrica?""
+interpretazione culturale - economica - politica di questi risultati (ad esempio se la Nigeria performa peggio del Ghana e del Senegal, quali sono le ragioni? E se il Sudafrica performa meglio, quali sono le ragioni?)
+
+
+2- modello singolo per paese (con interpretazione dei risultati) + tabella con i risultati per paese (coeff, significatività, R2) + riflessioni su quali variabili sono più importanti per spiegare il HDI in ciascun paese 
+come se avessi una dummy 
+questi modelli vanno necessariamente fatti standard (ovvero o con la funzione scale() o con la funzione standardize() del pacchetto parameters) per poter confrontare i coefficienti tra i modelli e capire quali variabili sono più importanti in ciascun paese
++ interpretazione test di significatività 
+
+3- creazione di dummy impulso per periodi di crisi (ad esempio crisi economica del 2008, crisi sanitaria del 2020) e interpretazione dei risultati (ad esempio se la crisi del 2008 ha avuto un impatto negativo sul HDI in Nigeria, quali sono le ragioni? E se la crisi del 2020 ha avuto un impatto negativo sul HDI in Senegal, quali sono le ragioni?)
+
+4- confronto tra modelli dei diversi paesi (non sappiamo ancora come)
