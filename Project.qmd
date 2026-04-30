@@ -689,30 +689,63 @@ pdata <- pdata.frame(data, index = c("country", "year"))
 model <- plm(HDI ~ Mortality + Electricity + Fertility + gdp + Population + Acqua + Investimenti_Stranieri, data = pdata, model = "within")
 summary(model)
 
-#CONSIGLIATO DA POSITRON
-# R
-library(dplyr)
-
-vars <- c("Mortality","Electricity","Fertility","gdp","Population","Acqua","Investimenti_Stranieri","HDI")
-df_p <- as.data.frame(pdata)
-
-# 1) per-country distinct counts
-within_counts <- df_p %>%
-  group_by(country) %>%
-  summarize(across(all_of(vars), ~n_distinct(.x)), .groups = "drop")
-
-# 2) predictors that are constant within every country
-const_within <- vars[ vapply(vars, function(v) all(within_counts[[v]] == 1), logical(1)) ]
-
-# 3) linear dependence via QR on model matrix (predictors only)
-mm <- model.matrix(~ Mortality + Electricity + Fertility + gdp + Population + Acqua + Investimenti_Stranieri, data = df_p)
-qr_mm <- qr(mm)
-dependent_columns <- setdiff(colnames(mm), colnames(mm)[seq_len(qr_mm$rank)])
-
-# return diagnostics
-list(within_counts = within_counts, constant_within = const_within, qr_rank = qr_mm$rank, dependent_columns = dependent_columns)
-
 ```
+
+# CHECK PER COLLINEARITÀ
+
+```{r}
+install.packages("car")
+library(car)
+model_lm <- lm(HDI ~ Mortality + Electricity + Fertility + gdp +
+               Population + Acqua + Investimenti_Stranieri,
+               data = data)
+
+vif(model_lm)
+
+
+
+#correlation matrix  + heatmap
+install.packages("corrplot")
+library(corrplot)
+vars <- data[, c("Mortality","Electricity","Fertility","gdp",
+                 "Population","Acqua","Investimenti_Stranieri")]
+
+cor_matrix <- cor(vars, use = "complete.obs")
+print(cor_matrix)
+corrplot(cor_matrix, method = "color", type = "upper")
+```
+
+# MODELLI DIVERSI
+
+# Modello economico 
+```{r}
+model_econ <- plm(HDI ~ log(gdp) + Investimenti_Stranieri + Electricity,
+                  data = pdata, model = "within")
+
+summary(model_econ)
+```
+
+
+# Modello sociale
+```{r}
+model_social <- plm(HDI ~ Mortality + Fertility + Acqua,
+                    data = pdata, model = "within")
+
+summary(model_social)
+```
+
+
+# Comparazione modelli
+```{r}
+install.packages("modelsummary")
+library(modelsummary)
+
+modelsummary(list(
+  "Economic Model" = model_econ,
+  "Social Model" = model_social
+))
+```
+
 
 
 # Summary + tabella e riflessioni 
