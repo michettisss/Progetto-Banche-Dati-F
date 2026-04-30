@@ -677,4 +677,3 @@ zaf <- Reduce(function(x, y) merge(x, y, by="year"),
 data <- rbind(gha, sen, nga, zaf)
 ```
 
-
