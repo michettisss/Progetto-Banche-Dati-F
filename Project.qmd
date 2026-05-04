@@ -751,17 +751,26 @@ sum(is.na(data$Mortality))
 # ensure pdata and create scaled numeric columns inside it
 pdata <- pdata.frame(data, index = c("country","year"))
 vars <- c("Mortality","Electricity","Fertility","gdp","Population","Acqua","Investimenti_Stranieri")
-for (v in vars) pdata[[paste0(v, "_s")]] <- as.numeric(scale(pdata[[v]]))
+# for (v in vars) pdata[[paste0(v, "_s")]] <- as.numeric(scale(pdata[[v]])) 
 
 # fit using the precomputed scaled variables (final line returns the model object)
-model_stand <- plm(HDI ~ Mortality_s + Electricity_s + Fertility_s + gdp_s + Population_s + Acqua_s + Investimenti_Stranieri_s,
+model_stand <- plm(HDI ~ Mortality + Electricity + Fertility + log(gdp) + log(Population) + Acqua + Investimenti_Stranieri,
                    data = pdata, model = "within")
 model_stand
-
+summary(model_stand)
 fixed_effects_stand <- fixef(model_stand)
+summary (pdata)
 ```
 
 # Modello singolo per paese
+# modello con slope diverso per ogni paese (interazione tra regressori e dummies per paese)
+```{r}
+model_stand2 <- plm(HDI ~ Mortality*as.factor(country) + Electricity*as.factor(country) + Fertility*as.factor(country) + log(gdp)*as.factor(country) + log(Population)*as.factor(country) + Acqua*as.factor(country) + Investimenti_Stranieri*as.factor(country),
+                   data = pdata, model = "within")
+model_stand2 
+a = summary(model_stand2)
+summary(model_stand2) |> coef() |> as.data.frame() |> xtable::xtable()
+```
 
 2- modello singolo per paese (con interpretazione dei risultati) + tabella con i risultati per paese (coeff, significatività, R2) + riflessioni su quali variabili sono più importanti per spiegare il HDI in ciascun paese 
 come se avessi una dummy 
@@ -890,6 +899,7 @@ confronto_effetti$Effetto_Reale_Ghana <- confronto_effetti$Effetto_Altri_Paesi +
 
 print(confronto_effetti)
 ```
+
 
 
 3- creazione di dummy impulso per periodi di crisi (ad esempio crisi economica del 2008, crisi sanitaria del 2020) e interpretazione dei risultati (ad esempio se la crisi del 2008 ha avuto un impatto negativo sul HDI in Nigeria, quali sono le ragioni? E se la crisi del 2020 ha avuto un impatto negativo sul HDI in Senegal, quali sono le ragioni?)
