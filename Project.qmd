@@ -679,27 +679,6 @@ data <- rbind(gha, sen, nga, zaf)
 ```
 
 
-# MODELLO PANEL
-
-```{r}
-#install.packages("plm")
-#library(plm)
-
-#pdata <- pdata.frame(data, index = c("country", "year"))
-#model <- plm(HDI ~ Mortality + Electricity + Fertility + gdp + Population + Acqua + Investimenti_Stranieri, data = pdata, model = "within")
-#summary(model)
-
-```
-
-```{r}
-#pdata2 <- pdata.frame(data, index = c("country", "year"))
-#model2 <- plm(HDI ~ Mortality + gdp + Population  + Investimenti_Stranieri, data = pdata, model = "within")
-#summary(model)
-
-```
-
-
-
 # CHECK PER COLLINEARITÀ
 ```{r}
 install.packages("car")
@@ -730,176 +709,23 @@ a parità di tutti i regressori qual è il paese che performa meglio in termini 
 "a parità di tutti i regressori l'HDI in Nigeria è più alto o più basso rispetto al Ghana? E rispetto al Senegal? E rispetto al Sudafrica?""
 interpretazione culturale - economica - politica di questi risultati (ad esempio se la Nigeria performa peggio del Ghana e del Senegal, quali sono le ragioni? E se il Sudafrica performa meglio, quali sono le ragioni?)
 
-# Modello unico
-Questo modello include solo alcune variabili, ovvero quelle con la minore correlazione tra loro, dopo con la stand li includiamo tutti.
-```{r}
-model_unico <- plm(HDI ~ log(gdp) + Mortality + Population + Investimenti_Stranieri,
-                   data = pdata, model = "within")
-
-summary(model_unico)
-fixed_effects <- fixef(model_unico)
-```
-
-# Modello standardizzato (scale)
-con TUTTI i regressori, ma standardizzati per poter confrontare i coefficienti.
-```{r}
-# check lengths / NAs
-nrow(pdata)
-length(data$Mortality)
-sum(is.na(data$Mortality))
-
-# ensure pdata and create scaled numeric columns inside it
-pdata <- pdata.frame(data, index = c("country","year"))
-vars <- c("Mortality","Electricity","Fertility","gdp","Population","Acqua","Investimenti_Stranieri")
-# for (v in vars) pdata[[paste0(v, "_s")]] <- as.numeric(scale(pdata[[v]])) 
-
-# fit using the precomputed scaled variables (final line returns the model object)
-model_stand <- plm(HDI ~ Mortality + Electricity + Fertility + log(gdp) + log(Population) + Acqua + Investimenti_Stranieri,
-                   data = pdata, model = "within")
-model_stand
-summary(model_stand)
-fixed_effects_stand <- fixef(model_stand)
-summary (pdata)
-```
-
 # Modello singolo per paese
 # modello con slope diverso per ogni paese (interazione tra regressori e dummies per paese)
 ```{r}
-model_stand2 <- plm(HDI ~ Mortality*as.factor(country) + Electricity*as.factor(country) + Fertility*as.factor(country) + log(gdp)*as.factor(country) + log(Population)*as.factor(country) + Acqua*as.factor(country) + Investimenti_Stranieri*as.factor(country),
+install.packages("plm")
+library(plm)
+pdata <- pdata.frame(data, index = c("country", "year"))
+model <- plm(HDI ~ Mortality*as.factor(country) + Electricity*as.factor(country) + Fertility*as.factor(country) + log(gdp)*as.factor(country) + log(Population)*as.factor(country) + Acqua*as.factor(country) + Investimenti_Stranieri*as.factor(country),
                    data = pdata, model = "within")
-model_stand2 
-a = summary(model_stand2)
-summary(model_stand2) |> coef() |> as.data.frame() |> xtable::xtable()
+model 
+a = summary(model)
+summary(model) |> coef() |> as.data.frame() |> xtable::xtable()
 ```
 
 2- modello singolo per paese (con interpretazione dei risultati) + tabella con i risultati per paese (coeff, significatività, R2) + riflessioni su quali variabili sono più importanti per spiegare il HDI in ciascun paese 
 come se avessi una dummy 
 questi modelli vanno necessariamente fatti standard (ovvero o con la funzione scale() o con la funzione standardize() del pacchetto parameters) per poter confrontare i coefficienti tra i modelli e capire quali variabili sono più importanti in ciascun paese
 + interpretazione test di significatività 
-
-# Creiamo variabili standardizzate per ogni regressore
-```{r}
-data.s <- data
-data.s$Mortality <- as.numeric(scale(data.s$Mortality))
-data.s$Electricity <- as.numeric(scale(data.s$Electricity))
-data.s$Fertility <- as.numeric(scale(data.s$Fertility))   
-data.s$gdp <- as.numeric(scale(data.s$gdp))
-data.s$Population <- as.numeric(scale(data.s$Population))
-data.s$Acqua <- as.numeric(scale(data.s$Acqua))
-data.s$Investimenti_Stranieri <- as.numeric(scale(data.s$Investimenti_Stranieri))
-```
-
-# creiamo dummies for countries
-```{r}
-data.s <- data.s %>%
-  mutate(
-    dummy_ghana = ifelse(country == "Ghana", 1, 0),
-    dummy_nigeria = ifelse(country == "Nigeria", 1, 0),
-    dummy_senegal = ifelse(country == "Senegal", 1, 0),
-    dummy_south_africa = ifelse(country == "South Africa", 1, 0)
-  )
-```
-
-# Modello classico PLM con dummies
-
-# In questo modello includiamo tutte le variabili, ma con l'interazione con le dummies per paese, in modo da poter interpretare i coefficienti come differenze rispetto al paese di riferimento (che è il Sudafrica, ovvero quello che ha la dummy = 0) 
-
-```{r}
-pdata.s <- pdata.frame(data.s, index = c("country", "year"))
-model_dummies <- plm(HDI ~ Mortality*dummy_ghana + Electricity*dummy_ghana + Fertility*dummy_ghana + gdp*dummy_ghana + Population*dummy_ghana + Acqua*dummy_ghana + Investimenti_Stranieri*dummy_ghana + Mortality*dummy_nigeria + Electricity*dummy_nigeria + Fertility*dummy_nigeria + gdp*dummy_nigeria + Population*dummy_nigeria + Acqua*dummy_nigeria + Investimenti_Stranieri*dummy_nigeria + Mortality*dummy_senegal + Electricity*dummy_senegal + Fertility*dummy_senegal + gdp*dummy_senegal + Population*dummy_senegal + Acqua*dummy_senegal + Investimenti_Stranieri*dummy_senegal + Mortality*dummy_south_africa + Electricity*dummy_south_africa + Fertility*dummy_south_africa + gdp*dummy_south_africa + Population*dummy_south_africa + Acqua*dummy_south_africa + Investimenti_Stranieri*dummy_south_africa,
-                     data = pdata.s , model = "within")
-summary(model_dummies)
-
-```
-
-L'elevato valore dell'R2 (0.99) non deve essere interpretato come misura dell'efficacia dei regressori, poiché nei modelli Fixed Effects (Within) esso risulta distorto dall'assorbimento dell'eterogeneità specifica dei paesi. Gran parte della varianza è spiegata dalle intercette individuali piuttosto che dalla variazione temporale delle variabili indipendenti. Per una valutazione corretta, si è data priorità alla significatività dei coefficienti e al Within-$R^2$, che isolano il reale potere esplicativo del modello al netto delle differenze strutturali tra le nazioni.
-
-```{r}
-install.packages("multcomp")
-library(multcomp)
-library(broom)
-library(dplyr)
-
-# 1. Definiamo la variabile e i paesi (escludendo il riferimento che è già "puro")
-variabile <- "Mortality"
-paesi_interazione <- c("dummy_ghana", "dummy_senegal", "dummy_nigeria", "dummy_south_africa") # Aggiungi i tuoi
-
-# 2. Creiamo le "ipotesi" di somma (Base + Interazione = 0)
-# Questo comando dice a R: "Somma il coeff base a quello del paese e dimmi se è diverso da zero"
-ipotesi <- c(
-  paste(variabile, "= 0"), # Questo è il paese di riferimento (già pronto)
-  paste(variabile, "+", variabile, ":", paesi_interazione, "= 0")
-)
-
-# 3. Eseguiamo il test
-test_risultati <- glht(model_dummies, linfct = ipotesi)
-
-# 4. Trasformiamo in una tabella pulita
-tabella_paesi <- tidy(summary(test_risultati)) %>%
-  mutate(paese = c( "Ghana", "Senegal", "Nigeria", "South Africa")) %>% # Cambia i nomi con i tuoi
-  select(paese, estimate, std.error, p.value)
-
-print(tabella_paesi)
-```
-
-
-# probabilmente è sbagliato LOL, ma è un tentativo di estrarre i coefficienti base e quelli di interazione per ogni paese, in modo da poter interpretare l'effetto reale di ogni variabile in ciascun paese, rispetto al paese di riferimento (Sudafrica).
-```{r}
-# Estraiamo i coefficienti in un vettore
-coefs <- coef(model_dummies)
-
-# Effetto della Mortalità negli altri paesi (Base)
-effetto_base_mortality <- coefs["Mortality"]
-effetto_base_electricity <- coefs["Electricity"]
-effetto_base_fertility <- coefs["Fertility"]
-effetto_base_gdp <- coefs["gdp"]
-effetto_base_population <- coefs["Population"]
-effetto_base_acqua <- coefs["Acqua"]
-effetto_base_investimenti <- coefs["Investimenti_Stranieri"]
-
-
-# Effetto della Mortalità in Ghana (Base + Differenza)
-effetto_ghana_mortality <- coefs["Mortality"] + coefs["Mortality:dummy_ghana"]
-effetto_ghana_electricity <- coefs["Electricity"] + coefs["Electricity:dummy_ghana"]
-effetto_ghana_fertility <- coefs["Fertility"] + coefs["Fertility:dummy_ghana"]
-effetto_ghana_gdp <- coefs["gdp"] + coefs["gdp:dummy_ghana"]
-effetto_ghana_population <- coefs["Population"] + coefs["Population:dummy_ghana"]
-effetto_ghana_acqua <- coefs["Acqua"] + coefs["Acqua:dummy_ghana"]
-effetto_ghana_investimenti <- coefs["Investimenti_Stranieri"] + coefs["Investimenti_Stranieri:dummy_ghana"]
-
-
-# Stampiamo i risultati
-print(paste("Effetto base Mortality:", effetto_base_mortality))
-print(paste("Effetto reale Mortality:", effetto_ghana_mortality))
-print(paste("Effetto base Electricity:", effetto_base_electricity))
-print(paste("Effetto reale Electricity:", effetto_ghana_electricity))
-print(paste("Effetto base Fertility:", effetto_base_fertility))
-print(paste("Effetto reale Fertility:", effetto_ghana_fertility))
-print(paste("Effetto base gdp:", effetto_base_gdp))
-print(paste("Effetto reale gdp:", effetto_ghana_gdp))
-print(paste("Effetto base Population:", effetto_base_population))
-print(paste("Effetto reale Population:", effetto_ghana_population))
-```
-
-
-```{r}
-# Identifichiamo i nomi delle variabili base (le prime 7 del tuo output)
-basi <- c("Mortality", "Electricity", "Fertility", "gdp", "Population", "Acqua", "Investimenti_Stranieri")
-
-# Creiamo una tabella per i risultati
-confronto_effetti <- data.frame(
-  Variabile = basi,
-  Effetto_Altri_Paesi = coefs[basi],
-  Differenza_Ghana = coefs[paste0(":dummy_ghana", basi)], # Nota: controlla se il nome è Mortality:dummy_ghana o dummy_ghana:Mortality nell'output
-  stringsAsFactors = FALSE
-)
-
-# Calcoliamo l'effetto reale per il Ghana
-confronto_effetti$Effetto_Reale_Ghana <- confronto_effetti$Effetto_Altri_Paesi + confronto_effetti$Differenza_Ghana
-
-print(confronto_effetti)
-```
-
 
 
 3- creazione di dummy impulso per periodi di crisi (ad esempio crisi economica del 2008, crisi sanitaria del 2020) e interpretazione dei risultati (ad esempio se la crisi del 2008 ha avuto un impatto negativo sul HDI in Nigeria, quali sono le ragioni? E se la crisi del 2020 ha avuto un impatto negativo sul HDI in Senegal, quali sono le ragioni?)
