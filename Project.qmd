@@ -735,3 +735,26 @@ questi modelli vanno necessariamente fatti standard (ovvero o con la funzione sc
 
 4- confronto tra modelli dei diversi paesi (non sappiamo ancora come)
 
+
+```{r}
+results <- summary(model) |> coef() |> as.data.frame() 
+results <- results[, c(1, 4)]
+results <- results %>%
+  rename(Coefficient = Estimate, P_value = `Pr(>|t|)`) %>%
+  mutate(Significant = ifelse(P_value < 0.05, "Yes", "No"))
+results_mort <- results[grep("Mortality", rownames(results)), ]
+results_elet <- results[grep("Electricity", rownames(results)), ]
+results_fert <- results[grep("Fertility", rownames(results)), ] 
+results_gdp <- results[grep("gdp", rownames(results)), ]
+results_pop <- results[grep("Population", rownames(results)), ]
+results_acqua <- results[grep("Acqua", rownames(results)), ]
+results_invst <- results[grep("Investimenti_Stranieri", rownames(results)), ]
+
+results_mort |> xtable::xtable()
+results_elet |> xtable::xtable()
+results_fert |> xtable::xtable()
+results_gdp |> xtable::xtable()
+results_pop |> xtable::xtable()
+results_acqua |> xtable::xtable()
+results_invst |> xtable::xtable()
+```
