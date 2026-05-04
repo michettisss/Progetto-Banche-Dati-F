@@ -714,8 +714,10 @@ interpretazione culturale - economica - politica di questi risultati (ad esempio
 ```{r}
 install.packages("plm")
 install.packages("xtable")
+
 library(plm)
 library("xtable")
+
 pdata <- pdata.frame(data, index = c("country", "year"))
 model <- plm(HDI ~ Mortality*as.factor(country) + Electricity*as.factor(country) + Fertility*as.factor(country) + log(gdp)*as.factor(country) + log(Population)*as.factor(country) + Acqua*as.factor(country) + Investimenti_Stranieri*as.factor(country),
                    data = pdata, model = "within")
@@ -738,6 +740,7 @@ questi modelli vanno necessariamente fatti standard (ovvero o con la funzione sc
 
 ```{r}
 results <- summary(model) |> coef() |> as.data.frame() 
+rownames(results) <- gsub("as.factor\\(country\\)", "", rownames(results))
 results <- results[, c(1, 4)]
 results <- results %>%
   rename(Coefficient = Estimate, P_value = `Pr(>|t|)`) %>%
@@ -750,11 +753,10 @@ results_pop <- results[grep("Population", rownames(results)), ]
 results_acqua <- results[grep("Acqua", rownames(results)), ]
 results_invst <- results[grep("Investimenti_Stranieri", rownames(results)), ]
 
-results_mort |> xtable::xtable()
-results_elet |> xtable::xtable()
-results_fert |> xtable::xtable()
-results_gdp |> xtable::xtable()
-results_pop |> xtable::xtable()
-results_acqua |> xtable::xtable()
-results_invst |> xtable::xtable()
+xtable::xtable(results_elet, digits = c(0, 6, 6, 0))
+xtable::xtable(results_fert, digits = c(0, 6, 6, 0))
+xtable::xtable(results_gdp, digits = c(0, 6, 6, 0))
+xtable::xtable(results_pop, digits = c(0, 6, 6, 0))
+xtable::xtable(results_acqua, digits = c(0, 6, 6, 0))
+xtable::xtable(results_invst, digits = c(0, 6, 6, 0))
 ```
