@@ -753,10 +753,47 @@ results_pop <- results[grep("Population", rownames(results)), ]
 results_acqua <- results[grep("Acqua", rownames(results)), ]
 results_invst <- results[grep("Investimenti_Stranieri", rownames(results)), ]
 
+xtable::xtable(results_mort, digits = c(0, 6, 6, 0))
 xtable::xtable(results_elet, digits = c(0, 6, 6, 0))
 xtable::xtable(results_fert, digits = c(0, 6, 6, 0))
 xtable::xtable(results_gdp, digits = c(0, 6, 6, 0))
 xtable::xtable(results_pop, digits = c(0, 6, 6, 0))
 xtable::xtable(results_acqua, digits = c(0, 6, 6, 0))
 xtable::xtable(results_invst, digits = c(0, 6, 6, 0))
+```
+
+
+
+# DUMMY STEP divise per eventi positivi e negativi 
+```{r}
+# 1. Creazione colonna POSITIVE_EVENTS
+# Accende 1 se (Ghana dal 2010) OPPURE (Senegal dal 2014). Altrimenti 0.
+data$POSITIVE_EVENTS <- ifelse(
+  (data$country == "Ghana" & data$year >= 2010) | 
+  (data$country == "Senegal" & data$year >= 2014), 
+  1, 0
+)
+
+# 2. Creazione colonna NEGATIVE_EVENTS
+# Accende 1 se (Sudafrica fino al 2004) OPPURE (Nigeria dal 2009). Altrimenti 0.
+data$NEGATIVE_EVENTS <- ifelse(
+  (data$country == "South Africa" & data$year <= 2004) | 
+  (data$country == "Nigeria" & data$year >= 2009), 
+  1, 0
+)
+```
+
+
+# Modello con DUMMY STEP
+
+```{r}
+pdata <- pdata.frame(data, index = c("country", "year"))
+model_dummy <- plm(HDI ~ Mortality*as.factor(country) + Electricity*as.factor(country) + 
+                   Fertility*as.factor(country) + log(gdp)*as.factor(country) + 
+                   log(Population)*as.factor(country) + Acqua*as.factor(country) + 
+                   Investimenti_Stranieri*as.factor(country) + 
+                   POSITIVE_EVENTS + NEGATIVE_EVENTS, # Aggiunte come controlli
+             data = pdata, model = "within")
+summary(model_dummy) |> coef() |> as.data.frame() |> xtable::xtable()
+summary(model_dummy)
 ```
