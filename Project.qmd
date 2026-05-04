@@ -713,7 +713,9 @@ interpretazione culturale - economica - politica di questi risultati (ad esempio
 # modello con slope diverso per ogni paese (interazione tra regressori e dummies per paese)
 ```{r}
 install.packages("plm")
+install.packages("xtable")
 library(plm)
+library("xtable")
 pdata <- pdata.frame(data, index = c("country", "year"))
 model <- plm(HDI ~ Mortality*as.factor(country) + Electricity*as.factor(country) + Fertility*as.factor(country) + log(gdp)*as.factor(country) + log(Population)*as.factor(country) + Acqua*as.factor(country) + Investimenti_Stranieri*as.factor(country),
                    data = pdata, model = "within")
@@ -732,5 +734,4 @@ questi modelli vanno necessariamente fatti standard (ovvero o con la funzione sc
 
 
 4- confronto tra modelli dei diversi paesi (non sappiamo ancora come)
-
 
