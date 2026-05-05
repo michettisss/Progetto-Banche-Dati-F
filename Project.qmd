@@ -792,8 +792,24 @@ model_dummy <- plm(HDI ~ Mortality*as.factor(country) + Electricity*as.factor(co
                    Fertility*as.factor(country) + log(gdp)*as.factor(country) + 
                    log(Population)*as.factor(country) + Acqua*as.factor(country) + 
                    Investimenti_Stranieri*as.factor(country) + 
-                   POSITIVE_EVENTS + NEGATIVE_EVENTS, # Aggiunte come controlli
+                   POSITIVE_EVENTS*as.factor(country) + NEGATIVE_EVENTS*as.factor(country), # Aggiunte come controlli
              data = pdata, model = "within")
 summary(model_dummy) |> coef() |> as.data.frame() |> xtable::xtable()
 summary(model_dummy)
+```
+
+
+```{r}
+data$crisis_2008 <- ifelse(data$year >= 2008 & data$year <= 2009, 1, 0)
+data$covid <- ifelse(data$year >= 2020 & data$year <= 2021, 1, 0)
+
+pdata_2008 <- pdata.frame(data, index = c("country", "year"))
+model2008 <- plm(
+  HDI ~ Mortality*as.factor(country) + Electricity*as.factor(country) + 
+                   Fertility*as.factor(country) + log(gdp)*as.factor(country) + 
+                   log(Population)*as.factor(country) + Acqua*as.factor(country) + 
+                   Investimenti_Stranieri*as.factor(country) + crisis_2008*as.factor(country) + covid*as.factor(country),
+  data = pdata_2008,
+  model = "within"
+)
 ```
