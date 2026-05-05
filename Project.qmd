@@ -812,4 +812,64 @@ model2008 <- plm(
   data = pdata_2008,
   model = "within"
 )
+summary(model2008) |> coef() |> as.data.frame() |> xtable::xtable()
+summary(model2008)
 ```
+
+# VIF modello 1
+```{r}
+
+```
+
+# dipendenza cross-sectional
+```{r}
+pcdtest(model, test = "cd")
+```
+
+Il test di Pesaran CD non evidenzia dipendenza cross-section tra i paesi (p-value > 0.05). Tuttavia, data la dimensione ridotta del campione e la natura macroeconomica delle variabili, non si può escludere completamente la presenza di shock comuni non osservati.
+
+# Eteroschedasticità
+```{r}
+library(lmtest)
+bptest(model)
+```
+
+Il test di Breusch-Pagan non evidenzia la presenza di eteroschedasticità (p-value > 0.05). Tuttavia, considerando la natura panel dei dati e la complessità del modello, si è comunque scelto di utilizzare errori standard robusti per garantire inferenze più affidabili.
+
+# stima modello versione errori robusti
+```{r}
+model_robust <- plm(HDI ~ Mortality*as.factor(country) + Electricity*as.factor(country) + Fertility*as.factor(country) + log(gdp)*as.factor(country) + log(Population)*as.factor(country) + Acqua*as.factor(country) + Investimenti_Stranieri*as.factor(country),
+                   data = pdata, model = "within", vcov = function(x) vcovHC(x, type = "HC1"))
+summary(model_robust) |> coef() |> as.data.frame() |> xtable::xtable()
+summary(model_robust)
+```
+
+Modello classico con errori standard robusti:
+L’utilizzo di errori standard robusti modifica parzialmente l’inferenza del modello, rendendo alcune variabili precedentemente significative non più rilevanti. I risultati evidenziano che il PIL, l’accesso all’acqua e gli investimenti stranieri rappresentano determinanti fondamentali dell’HDI. Tuttavia, emergono forti differenze tra paesi, come dimostrato dalle interazioni, che indicano effetti eterogenei delle variabili socio-economiche. La presenza di numerose interazioni e l’elevato R² suggeriscono possibili problemi di overfitting e multicollinearità.
+
+
+```{r}
+model_lm <- lm(
+  HDI ~ Mortality * as.factor(country) +
+    Electricity * as.factor(country) +
+    Fertility * as.factor(country) +
+    log(gdp) * as.factor(country) +
+    log(Population) * as.factor(country) +
+    Acqua * as.factor(country) +
+    Investimenti_Stranieri * as.factor(country),
+  data = pdata
+)
+library(car)
+
+vif(model_lm)
+```
+
+IMPORTANTE DA LEGGERE ALL TOGHETHER FOREVER
+lo scrivo qua:
+il VIF esplode in ognuna delle variabili; in particolare country dummies sopra 4200!
+
+Nel modello abbiamo incluso diverse variabili per spiegare l’HDI (come mortalità, PIL, accesso all’acqua, elettricità, fertilità e investimenti esteri). Tuttavia, durante l’analisi è emerso che alcune variabili non aggiungono davvero informazione indipendente.
+In particolare, la mortalità risulta fortemente collegata ad altre variabili già presenti nel modello. Ad esempio, paesi con PIL più alto, migliore accesso all’acqua e maggiore disponibilità di elettricità tendono anche ad avere una mortalità più bassa. Questo significa che la mortalità non rappresenta un fattore completamente separato, ma piuttosto un “riassunto” delle condizioni di sviluppo già catturate da altre variabili.
+Dal punto di vista econometrico questo crea un problema di ridondanza: quando variabili molto simili vengono inserite insieme, diventa difficile distinguere il loro effetto individuale sull’HDI. Di conseguenza, i coefficienti possono diventare instabili o poco significativi, senza che questo significhi che la variabile non sia importante in senso generale.
+Per questo motivo, in alcuni casi è preferibile semplificare il modello e mantenere solo le variabili che rappresentano direttamente i principali canali di sviluppo, migliorando così la chiarezza e l’affidabilità dell’interpretazione.
+Ad esempio si può aggiungere le interazioni solo su GDP e fertilità, che sono le variabili più importanti per spiegare l’HDI, e rimuovere le interazioni su mortalità, elettricità, accesso all’acqua e investimenti esteri, che risultano essere ridondanti. In questo modo si mantiene un modello più parsimonioso e interpretabile, senza perdere informazioni rilevanti.
