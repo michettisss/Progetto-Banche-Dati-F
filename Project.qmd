@@ -816,10 +816,6 @@ summary(model2008) |> coef() |> as.data.frame() |> xtable::xtable()
 summary(model2008)
 ```
 
-# VIF modello 1
-```{r}
-
-```
 
 # dipendenza cross-sectional
 ```{r}
@@ -842,12 +838,16 @@ model_robust <- plm(HDI ~ Mortality*as.factor(country) + Electricity*as.factor(c
                    data = pdata, model = "within", vcov = function(x) vcovHC(x, type = "HC1"))
 summary(model_robust) |> coef() |> as.data.frame() |> xtable::xtable()
 summary(model_robust)
+
+pcdtest(model_robust, test = "cd") #dipendenza cross-sectional
+bptest(model_robust) #eteroschedasticità
+residuals(model_robust) |> plot() #analisi dei residui + grafico (un po' bruttino da vedere perché ha tutte le date impicciate)
 ```
 
 Modello classico con errori standard robusti:
 L’utilizzo di errori standard robusti modifica parzialmente l’inferenza del modello, rendendo alcune variabili precedentemente significative non più rilevanti. I risultati evidenziano che il PIL, l’accesso all’acqua e gli investimenti stranieri rappresentano determinanti fondamentali dell’HDI. Tuttavia, emergono forti differenze tra paesi, come dimostrato dalle interazioni, che indicano effetti eterogenei delle variabili socio-economiche. La presenza di numerose interazioni e l’elevato R² suggeriscono possibili problemi di overfitting e multicollinearità.
 
-
+# modello panel con lm così da poter verificare il VIF
 ```{r}
 model_lm <- lm(
   HDI ~ Mortality * as.factor(country) +
