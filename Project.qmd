@@ -864,6 +864,13 @@ library(car)
 vif(model_lm)
 ```
 
+# creazione di grafici
+```{r}
+coefs <- summary(model)$coefficients %>% 
+  as.data.frame() %>%
+  tibble::rownames_to_column("term")
+```
+
 IMPORTANTE DA LEGGERE ALL TOGHETHER FOREVER
 lo scrivo qua:
 il VIF esplode in ognuna delle variabili; in particolare country dummies sopra 4200!
