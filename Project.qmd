@@ -505,7 +505,6 @@ View(d_elet)
 ```
 
 
-
 ```{r}
 elet_long %>%
   group_by(Country.Name) %>%
@@ -535,7 +534,6 @@ commento tabella: La tabella mostra le statistiche descrittive dell'accesso all'
 
 
 # INVESTIMENTI STRANIERI
-
 ```{r}
 invst <- read_excel("investimenti stranieri.xlsx")
 invst <- invst[c(1:4), c(-2, -3, -4)]
@@ -567,6 +565,7 @@ ggplot(invst_long, aes(x = year, y = Investimenti_Stranieri, color = Country.Nam
 d_invst <- describe(invst)
 View(d_invst)
 ```
+
 
 ```{r}
 invst_long %>%
@@ -679,7 +678,7 @@ data <- rbind(gha, sen, nga, zaf)
 ```
 
 
-# CHECK PER COLLINEARITÀ
+# CHECK PER COLLINEARITÀ - matrice di correlazione + heatmap
 ```{r}
 install.packages("car")
 library(car)
@@ -703,14 +702,14 @@ corrplot(cor_matrix, method = "color", type = "upper")
 ```
 
 # MODELLI 
-
 1- fixed effects + interpretazione FE (con tabella dei fixed effects per paese)
 a parità di tutti i regressori qual è il paese che performa meglio in termini di HDI e quale peggio? 
 "a parità di tutti i regressori l'HDI in Nigeria è più alto o più basso rispetto al Ghana? E rispetto al Senegal? E rispetto al Sudafrica?""
 interpretazione culturale - economica - politica di questi risultati (ad esempio se la Nigeria performa peggio del Ghana e del Senegal, quali sono le ragioni? E se il Sudafrica performa meglio, quali sono le ragioni?)
 
-# Modello singolo per paese
-# modello con slope diverso per ogni paese (interazione tra regressori e dummies per paese)
+# MODELLO 1 - PLM CON TUTTI I REGRESSORI E INTERAZIONI CON DUMMY PER PAESE (SLOPE DIVERSO PER OGNI PAESE) - 
+# errori robusti per eteroschedasticità
+
 ```{r}
 install.packages("plm")
 install.packages("xtable")
@@ -718,26 +717,17 @@ install.packages("xtable")
 library(plm)
 library("xtable")
 
-pdata <- pdata.frame(data, index = c("country", "year"))
-model <- plm(HDI ~ Mortality*as.factor(country) + Electricity*as.factor(country) + Fertility*as.factor(country) + log(gdp)*as.factor(country) + log(Population)*as.factor(country) + Acqua*as.factor(country) + Investimenti_Stranieri*as.factor(country),
-                   data = pdata, model = "within")
-model 
-a = summary(model)
+model <- plm(HDI ~ Mortality*as.factor(country) + Electricity*as.factor(country) + Fertility*as.factor(country) + log(gdp)*as.factor(country) + Acqua*as.factor(country) + Investimenti_Stranieri*as.factor(country),
+                   data = pdata, model = "within", vcov = function(x) vcovHC(x, type = "HC1"))
 summary(model) |> coef() |> as.data.frame() |> xtable::xtable()
+summary(model)
+
+pcdtest(model, test = "cd") #dipendenza cross-sectional
+bptest(model) #eteroschedasticità
+residuals(model) |> plot() #analisi dei residui + grafico (un po' bruttino da vedere perché ha tutte le date impicciate)
 ```
 
-2- modello singolo per paese (con interpretazione dei risultati) + tabella con i risultati per paese (coeff, significatività, R2) + riflessioni su quali variabili sono più importanti per spiegare il HDI in ciascun paese 
-come se avessi una dummy 
-questi modelli vanno necessariamente fatti standard (ovvero o con la funzione scale() o con la funzione standardize() del pacchetto parameters) per poter confrontare i coefficienti tra i modelli e capire quali variabili sono più importanti in ciascun paese
-+ interpretazione test di significatività 
-
-
-3- creazione di dummy impulso per periodi di crisi (ad esempio crisi economica del 2008, crisi sanitaria del 2020) e interpretazione dei risultati (ad esempio se la crisi del 2008 ha avuto un impatto negativo sul HDI in Nigeria, quali sono le ragioni? E se la crisi del 2020 ha avuto un impatto negativo sul HDI in Senegal, quali sono le ragioni?)
-
-
-4- confronto tra modelli dei diversi paesi (non sappiamo ancora come)
-
-
+# TABELLA 1 - COEFFICIENTI MODELLO 1
 ```{r}
 results <- summary(model) |> coef() |> as.data.frame() 
 rownames(results) <- gsub("as.factor\\(country\\)", "", rownames(results))
@@ -764,67 +754,62 @@ xtable::xtable(results_invst, digits = c(0, 6, 6, 0))
 
 
 
-# DUMMY STEP divise per eventi positivi e negativi 
+# MODELLO 2 - PLM CON TUTTI I REGRESSORI, INTERAZIONI CON DUMMY PER PAESE E DUMMY PER CRISI (SLOPE DIVERSO PER OGNI PAESE E PER OGNI CRISI)
+Creazione di dummy impulso per periodi di crisi (ad esempio crisi economica del 2008, crisi sanitaria del 2020) e interpretazione dei risultati (ad esempio se la crisi del 2008 ha avuto un impatto negativo sul HDI in Nigeria, quali sono le ragioni? E se la crisi del 2020 ha avuto un impatto negativo sul HDI in Senegal, quali sono le ragioni?)
 ```{r}
-# 1. Creazione colonna POSITIVE_EVENTS
-# Accende 1 se (Ghana dal 2010) OPPURE (Senegal dal 2014). Altrimenti 0.
-data$POSITIVE_EVENTS <- ifelse(
-  (data$country == "Ghana" & data$year >= 2010) | 
-  (data$country == "Senegal" & data$year >= 2014), 
-  1, 0
+data$crisis_2008 <- ifelse(data$year >= 2008 & data$year <= 2009, 1, 0)
+data$covid <- ifelse(data$year >= 2020 & data$year <= 2021, 1, 0)
+
+pdata_dummy <- pdata.frame(data, index = c("country", "year"))
+model_dummy<- plm(
+  HDI ~ Mortality*as.factor(country) + Electricity*as.factor(country) + 
+                   Fertility*as.factor(country) + log(gdp)*as.factor(country) + Acqua*as.factor(country) + 
+                   Investimenti_Stranieri*as.factor(country) + crisis_2008*as.factor(country) + covid*as.factor(country),
+  data = pdata_dummy,
+  model = "within"
 )
-
-# 2. Creazione colonna NEGATIVE_EVENTS
-# Accende 1 se (Sudafrica fino al 2004) OPPURE (Nigeria dal 2009). Altrimenti 0.
-data$NEGATIVE_EVENTS <- ifelse(
-  (data$country == "South Africa" & data$year <= 2004) | 
-  (data$country == "Nigeria" & data$year >= 2009), 
-  1, 0
-)
-```
-
-
-# Modello con DUMMY STEP
-
-```{r}
-pdata <- pdata.frame(data, index = c("country", "year"))
-model_dummy <- plm(HDI ~ Mortality*as.factor(country) + Electricity*as.factor(country) + 
-                   Fertility*as.factor(country) + log(gdp)*as.factor(country) + 
-                   log(Population)*as.factor(country) + Acqua*as.factor(country) + 
-                   Investimenti_Stranieri*as.factor(country) + 
-                   POSITIVE_EVENTS*as.factor(country) + NEGATIVE_EVENTS*as.factor(country), # Aggiunte come controlli
-             data = pdata, model = "within")
 summary(model_dummy) |> coef() |> as.data.frame() |> xtable::xtable()
 summary(model_dummy)
 ```
 
 
+#  TABELLA 2 - COEFFICIENTI MODELLO 2
 ```{r}
-data$crisis_2008 <- ifelse(data$year >= 2008 & data$year <= 2009, 1, 0)
-data$covid <- ifelse(data$year >= 2020 & data$year <= 2021, 1, 0)
+results_dummy <- summary(model_dummy) |> coef() |> as.data.frame() 
+rownames(results_dummy) <- gsub("as.factor\\(country\\)", "", rownames(results_dummy))
+results_dummy <- results_dummy[, c(1, 4)]
+results_dummy <- results_dummy %>%
+  rename(Coefficient = Estimate, P_value = `Pr(>|t|)`) %>%
+  mutate(Significant = ifelse(P_value < 0.05, "Yes", "No"))
+results_mort_dummy <- results_dummy[grep("Mortality", rownames(results_dummy)), ]
+results_elet_dummy <- results_dummy[grep("Electricity", rownames(results_dummy)), ]
+results_fert_dummy <- results_dummy[grep("Fertility", rownames(results_dummy)), ] 
+results_gdp_dummy <- results_dummy[grep("gdp", rownames(results_dummy)), ]
+results_acqua_dummy <- results_dummy[grep("Acqua", rownames(results_dummy)), ]
+results_invst_dummy <- results_dummy[grep("Investimenti_Stranieri", rownames(results_dummy)), ]
 
-pdata_2008 <- pdata.frame(data, index = c("country", "year"))
-model2008 <- plm(
-  HDI ~ Mortality*as.factor(country) + Electricity*as.factor(country) + 
-                   Fertility*as.factor(country) + log(gdp)*as.factor(country) + 
-                   log(Population)*as.factor(country) + Acqua*as.factor(country) + 
-                   Investimenti_Stranieri*as.factor(country) + crisis_2008*as.factor(country) + covid*as.factor(country),
-  data = pdata_2008,
-  model = "within"
-)
-summary(model2008) |> coef() |> as.data.frame() |> xtable::xtable()
-summary(model2008)
+xtable::xtable(results_mort_dummy, digits = c(0, 6, 6, 0))
+xtable::xtable(results_elet_dummy, digits = c(0, 6, 6, 0))
+xtable::xtable(results_fert_dummy, digits = c(0, 6, 6, 0))
+xtable::xtable(results_gdp_dummy, digits = c(0, 6, 6, 0))
+xtable::xtable(results_acqua_dummy, digits = c(0, 6, 6, 0))
+xtable::xtable(results_invst_dummy, digits = c(0, 6, 6, 0))
 ```
 
 
-# dipendenza cross-sectional
+
+
+
+# DIAGNOSTICA DEI MODELLI
+
+# 1- dipendenza cross-sectional
 ```{r}
 pcdtest(model, test = "cd")
 ```
 
 Il test di Pesaran CD non evidenzia dipendenza cross-section tra i paesi (p-value > 0.05). Tuttavia, data la dimensione ridotta del campione e la natura macroeconomica delle variabili, non si può escludere completamente la presenza di shock comuni non osservati.
 
-# Eteroschedasticità
+# 2- Eteroschedasticità
 ```{r}
 library(lmtest)
 bptest(model)
@@ -832,39 +817,34 @@ bptest(model)
 
 Il test di Breusch-Pagan non evidenzia la presenza di eteroschedasticità (p-value > 0.05). Tuttavia, considerando la natura panel dei dati e la complessità del modello, si è comunque scelto di utilizzare errori standard robusti per garantire inferenze più affidabili.
 
-# stima modello versione errori robusti
-```{r}
-model_robust <- plm(HDI ~ Mortality*as.factor(country) + Electricity*as.factor(country) + Fertility*as.factor(country) + log(gdp)*as.factor(country) + log(Population)*as.factor(country) + Acqua*as.factor(country) + Investimenti_Stranieri*as.factor(country),
-                   data = pdata, model = "within", vcov = function(x) vcovHC(x, type = "HC1"))
-summary(model_robust) |> coef() |> as.data.frame() |> xtable::xtable()
-summary(model_robust)
-
-pcdtest(model_robust, test = "cd") #dipendenza cross-sectional
-bptest(model_robust) #eteroschedasticità
-residuals(model_robust) |> plot() #analisi dei residui + grafico (un po' bruttino da vedere perché ha tutte le date impicciate)
-```
 
 Modello classico con errori standard robusti:
 L’utilizzo di errori standard robusti modifica parzialmente l’inferenza del modello, rendendo alcune variabili precedentemente significative non più rilevanti. I risultati evidenziano che il PIL, l’accesso all’acqua e gli investimenti stranieri rappresentano determinanti fondamentali dell’HDI. Tuttavia, emergono forti differenze tra paesi, come dimostrato dalle interazioni, che indicano effetti eterogenei delle variabili socio-economiche. La presenza di numerose interazioni e l’elevato R² suggeriscono possibili problemi di overfitting e multicollinearità.
 
 L’analisi dei residui evidenzia la presenza di possibili pattern sistematici e osservazioni estreme. Questo suggerisce che, pur essendo il modello statisticamente significativo e ben specificato in termini di effetti fissi, potrebbero essere presenti dinamiche temporali non completamente catturate, come autocorrelazione nei dati panel. L’utilizzo di errori standard robusti garantisce comunque una corretta inferenza sui coefficienti stimati.
 
-# modello panel con lm così da poter verificare il VIF
+
+# MODELLO PER VIF SENZA POPOLAZIONE 
+# modello panel con lm così da poter verificare il VIF senza dover utilizzare il pacchetto plm, che non permette di calcolare il VIF con interazioni tra variabili e dummies per paese (che sono presenti nel modello plm)
 ```{r}
-model_lm <- lm(
+model_lm1 <- lm(
   HDI ~ Mortality * as.factor(country) +
     Electricity * as.factor(country) +
     Fertility * as.factor(country) +
     log(gdp) * as.factor(country) +
-    log(Population) * as.factor(country) +
     Acqua * as.factor(country) +
     Investimenti_Stranieri * as.factor(country),
   data = pdata
 )
 library(car)
-
-vif(model_lm)
+summary(model_lm1)
+vif(model_lm1)
 ```
+
+
+
+
+# DOMANDA DI RICERCA 1 - ECONOMICA
 
 # creazione di grafici
 ```{r}
@@ -872,27 +852,6 @@ coefs <- summary(model)$coefficients %>%
   as.data.frame() %>%
   tibble::rownames_to_column("term")
 ```
-
-# effetto del GDP per paese
-```{r}
-gdp <- coefs %>%
-  filter(grepl("log\\(gdp\\)", term))
-
-ggplot(gdp, aes(x = term, y = Estimate)) +
-  geom_point(size = 3) +
-  geom_errorbar(aes(ymin = Estimate - 1.96 * `Std. Error`,
-                    ymax = Estimate + 1.96 * `Std. Error`),
-                width = 0.2) +
-  coord_flip() +
-  theme_minimal() +
-  labs(title = "Effetto del GDP per paese",
-       x = "",
-       y = "Coefficiente")
-```
-
-dal grafico emerge che l'effetto del GDP sull'HDI è positivo per tutti i paesi, ma con una pendenza diversa. Ad esempio, il Ghana ha un coefficiente più basso rispetto al Sudafrica, il che significa che un aumento del GDP ha un impatto minore sull'HDI in Ghana rispetto al Sudafrica.
-Invece per il Senegal e la Nigeria l'effetto del GDP è più simile, ma comunque inferiore rispetto al Sudafrica. Questo potrebbe essere dovuto a diversi fattori, come ad esempio la struttura economica dei paesi, la distribuzione del reddito, o la presenza di altri fattori che influenzano l'HDI in modo più significativo rispetto al GDP.
-Nonostante ciò il GDP rimane un fattore importante per spiegare l'HDI in tutti i paesi, ma è evidente che il suo impatto varia a seconda del contesto specifico di ciascun paese.
 
 # relazione tra GDP e HDI 
 ```{r}
