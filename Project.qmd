@@ -847,6 +847,8 @@ residuals(model_robust) |> plot() #analisi dei residui + grafico (un po' bruttin
 Modello classico con errori standard robusti:
 L’utilizzo di errori standard robusti modifica parzialmente l’inferenza del modello, rendendo alcune variabili precedentemente significative non più rilevanti. I risultati evidenziano che il PIL, l’accesso all’acqua e gli investimenti stranieri rappresentano determinanti fondamentali dell’HDI. Tuttavia, emergono forti differenze tra paesi, come dimostrato dalle interazioni, che indicano effetti eterogenei delle variabili socio-economiche. La presenza di numerose interazioni e l’elevato R² suggeriscono possibili problemi di overfitting e multicollinearità.
 
+L’analisi dei residui evidenzia la presenza di possibili pattern sistematici e osservazioni estreme. Questo suggerisce che, pur essendo il modello statisticamente significativo e ben specificato in termini di effetti fissi, potrebbero essere presenti dinamiche temporali non completamente catturate, come autocorrelazione nei dati panel. L’utilizzo di errori standard robusti garantisce comunque una corretta inferenza sui coefficienti stimati.
+
 # modello panel con lm così da poter verificare il VIF
 ```{r}
 model_lm <- lm(
@@ -870,6 +872,45 @@ coefs <- summary(model)$coefficients %>%
   as.data.frame() %>%
   tibble::rownames_to_column("term")
 ```
+
+# effetto del GDP per paese
+```{r}
+gdp <- coefs %>%
+  filter(grepl("log\\(gdp\\)", term))
+
+ggplot(gdp, aes(x = term, y = Estimate)) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = Estimate - 1.96 * `Std. Error`,
+                    ymax = Estimate + 1.96 * `Std. Error`),
+                width = 0.2) +
+  coord_flip() +
+  theme_minimal() +
+  labs(title = "Effetto del GDP per paese",
+       x = "",
+       y = "Coefficiente")
+```
+
+dal grafico emerge che l'effetto del GDP sull'HDI è positivo per tutti i paesi, ma con una pendenza diversa. Ad esempio, il Ghana ha un coefficiente più basso rispetto al Sudafrica, il che significa che un aumento del GDP ha un impatto minore sull'HDI in Ghana rispetto al Sudafrica.
+Invece per il Senegal e la Nigeria l'effetto del GDP è più simile, ma comunque inferiore rispetto al Sudafrica. Questo potrebbe essere dovuto a diversi fattori, come ad esempio la struttura economica dei paesi, la distribuzione del reddito, o la presenza di altri fattori che influenzano l'HDI in modo più significativo rispetto al GDP.
+Nonostante ciò il GDP rimane un fattore importante per spiegare l'HDI in tutti i paesi, ma è evidente che il suo impatto varia a seconda del contesto specifico di ciascun paese.
+
+# relazione tra GDP e HDI 
+```{r}
+df <- as.data.frame(pdata)
+
+ggplot(df, aes(x = log(gdp), y = HDI, color = country)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal() +
+  labs(title = "Relazione tra GDP e HDI",
+       x = "log(GDP)",
+       y = "HDI")
+```
+
+facciamo vedere con questo grafico che la relazione tra GDP e HDI è positiva, ma con una pendenza diversa per ogni paese (ad esempio il Ghana ha una pendenza più bassa rispetto al Sudafrica, il che significa che un aumento del GDP ha un impatto minore sull'HDI in Ghana rispetto al Sudafrica).
+
+
+
 
 IMPORTANTE DA LEGGERE ALL TOGHETHER FOREVER
 lo scrivo qua:
