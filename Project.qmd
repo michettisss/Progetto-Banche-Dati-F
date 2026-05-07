@@ -842,6 +842,8 @@ vif(model_lm1)
 ```
 
 
+ciao
+ciao 
 
 
 # DOMANDA DI RICERCA 1 - ECONOMICA
