@@ -709,22 +709,17 @@ interpretazione culturale - economica - politica di questi risultati (ad esempio
 
 # MODELLO 1 - PLM CON TUTTI I REGRESSORI E INTERAZIONI CON DUMMY PER PAESE (SLOPE DIVERSO PER OGNI PAESE) - 
 # errori robusti per eteroschedasticità
-
 ```{r}
 install.packages("plm")
 install.packages("xtable")
 
 library(plm)
 library("xtable")
-
+pdata<- pdata.frame(data, index = c("country", "year"))
 model <- plm(HDI ~ Mortality*as.factor(country) + Electricity*as.factor(country) + Fertility*as.factor(country) + log(gdp)*as.factor(country) + Acqua*as.factor(country) + Investimenti_Stranieri*as.factor(country),
                    data = pdata, model = "within", vcov = function(x) vcovHC(x, type = "HC1"))
 summary(model) |> coef() |> as.data.frame() |> xtable::xtable()
 summary(model)
-
-pcdtest(model, test = "cd") #dipendenza cross-sectional
-bptest(model) #eteroschedasticità
-residuals(model) |> plot() #analisi dei residui + grafico (un po' bruttino da vedere perché ha tutte le date impicciate)
 ```
 
 # TABELLA 1 - COEFFICIENTI MODELLO 1
@@ -798,8 +793,6 @@ xtable::xtable(results_invst_dummy, digits = c(0, 6, 6, 0))
 
 
 
-
-
 # DIAGNOSTICA DEI MODELLI
 
 # 1- dipendenza cross-sectional
@@ -823,6 +816,14 @@ L’utilizzo di errori standard robusti modifica parzialmente l’inferenza del 
 
 L’analisi dei residui evidenzia la presenza di possibili pattern sistematici e osservazioni estreme. Questo suggerisce che, pur essendo il modello statisticamente significativo e ben specificato in termini di effetti fissi, potrebbero essere presenti dinamiche temporali non completamente catturate, come autocorrelazione nei dati panel. L’utilizzo di errori standard robusti garantisce comunque una corretta inferenza sui coefficienti stimati.
 
+```{r}
+pcdtest(model, test = "cd") #dipendenza cross-sectional
+bptest(model) #eteroschedasticità
+residuals(model) |> plot() #analisi dei residui + grafico (un po' bruttino da vedere perché ha tutte le date impicciate)
+```
+
+
+
 
 # MODELLO PER VIF SENZA POPOLAZIONE 
 # modello panel con lm così da poter verificare il VIF senza dover utilizzare il pacchetto plm, che non permette di calcolare il VIF con interazioni tra variabili e dummies per paese (che sono presenti nel modello plm)
@@ -840,11 +841,6 @@ library(car)
 summary(model_lm1)
 vif(model_lm1)
 ```
-
-
-ciao
-ciao 
-
 
 # DOMANDA DI RICERCA 1 - ECONOMICA
 
