@@ -2,14 +2,14 @@
 title: "Sviluppo Umano nell'Africa Sub-Sahariana"
 subtitle: "Un'analisi comparativa: Nigeria, Ghana, Senegal, Sudafrica"
 author: "Bondi, Dal Ben, Michetti, Proietti, Veronese"
-date: 14/05/26
+date: 2026-05-14
 lang: it
 format:
   beamer:
     theme: metropolis
     colortheme: default
     fonttheme: structurebold
-    aspectratio: 169
+    aspectratio: 43
     toc: false
     slide-level: 2
     header-includes: |
