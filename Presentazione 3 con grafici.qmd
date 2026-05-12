@@ -315,6 +315,67 @@ ggplot(invst_long, aes(x = year, y = Investimenti_Stranieri, color = Country.Nam
 \vspace{0.4em}
 \textbf{Modello 2} aggiunge dummy di crisi: \textit{crisi finanziaria 2008--09} e \textit{COVID-19 2020--21}
 
+## Metodologia: Perché il Fixed Effect (FE)?
+
+Per l'analisi panel abbiamo scelto lo stimatore **Within**:
+
+$$Y_{it} = \alpha_i + \beta X_{it} + \epsilon_{it}$$
+
+- **$\alpha_i$ (Effetti Fissi):** Cattura le caratteristiche specifiche di ogni paese che non variano nel tempo (cultura, posizione geografica, istituzioni storiche).
+- **Vantaggio:** Elimina il bias derivante da variabili omesse costanti nel tempo.
+- **Focus:** Ci permette di vedere come le variazioni *interne* ai paesi influenzano l'HDI.
+
+## Presentazione del Modello 1 (Baseline)
+
+Il modello stima l'impatto dei regressori sull'HDI:
+
+$$\text{HDI}_{it} = \alpha_i + \beta_1 \text{Mort}_{it} + \beta_2 \text{Ele}_{it} + \beta_3 \text{Fert}_{it} + \beta_4 \log(\text{GDP})_{it} + \beta_5 \text{Wat}_{it} + \epsilon_{it}$$
+
+\begin{table}
+\small\centering
+\begin{tabular}{lrr}
+\toprule
+\textbf{Variabile} & \textbf{Coefficiente} & \textbf{P-value} \\
+\midrule
+$\log(\text{GDP})$ & 0.0423 & 0.001*** \\
+Acqua Potabile     & 0.0031 & 0.012**  \\
+Mortalità          & -0.0004 & 0.145   \\
+Fertilità          & -0.0152 & 0.005** \\
+\bottomrule
+\end{tabular}
+\caption{Risultati Modello Within}
+\end{table}
+
+## Modello con Errori Standard Robusti
+
+Data la natura dei dati macroeconomici, abbiamo corretto per **eteroschedasticità** (White/HC1):
+
+- **Perché?** I residui potrebbero avere varianza non costante tra paesi (es. Nigeria vs Senegal).
+- **Risultato:** I coefficienti restano invariati, ma gli intervalli di confidenza si ampliano.
+- **Evidenza:** Il PIL e l'accesso all'Acqua restano i driver più solidi e significativi anche dopo la correzione.
+
+## Modello con Dummy Crisi (2008 e 2020)
+
+Abbiamo testato la resilienza dell'HDI agli shock globali:
+
+$$\text{HDI}_{it} = \dots + \gamma_1 D_{2008} + \gamma_2 D_{2020} + \epsilon_{it}$$
+
+\begin{table}
+\small\centering
+\begin{tabular}{lrr}
+\toprule
+\textbf{Evento} & \textbf{Effetto Stimato} & \textbf{Significatività} \\
+\midrule
+Crisi 2008  & -0.0021 & Significativo       \\
+COVID-2020  & -0.0085 & Molto Significativo \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+- **2008:** Impatto moderato, legato principalmente al canale del commercio.
+- **2020:** Forte contrazione dovuta al blocco simultaneo di economia e servizi sanitari.
+
+
 ## {.plain}
 
 ```{r plot-gdp-hdi, fig.width=10, fig.height=5.5, out.width="100%"}
