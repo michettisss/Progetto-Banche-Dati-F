@@ -32,7 +32,7 @@ repo <- "https://github.com/michettisss/Progetto-Banche-Dati-F.git"
 ```
 
 # Installazione pacchetti necessari
-```{r}
+
 # Analisi statistica e descrittiva
 install.packages("psych")    # Per la funzione describe() 
 install.packages("car")      # Per il calcolo del VIF (collinearità)
