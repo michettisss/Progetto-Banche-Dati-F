@@ -26,23 +26,6 @@ execute:
   message: false
 --- 
 
-
-% Definizione colore personalizzato e applicazione
-\definecolor{darkgreen}{RGB}{0,102,51}
-\setbeamercolor{structure}{fg=darkgreen}
-
-% --- Configurazione Link ---
-\hypersetup{
-    colorlinks=true,
-    linkcolor=blue,
-    urlcolor=blue
-}
-
-% Footer pulito con numero di pagina
-\setbeamertemplate{footline}[page number]
-
-
-
 # RIPRODUCIBILITà DEL PROGETTO
 ```{r}
 repo <- "https://github.com/michettisss/Progetto-Banche-Dati-F.git"
@@ -99,6 +82,100 @@ library(plm)       # Modelli a effetti fissi (within)
 library(gt)        # Creazione tabelle statistiche eleganti
 library(xtable)    # Esportazione coefficienti dei modelli 
 ```
+
+
+```{beamer}
+% --- SLIDE 1: Recap ---
+\begin{frame}{Dove eravamo rimasti?}
+    \begin{block}{Recap delle fasi precedenti}
+        \begin{itemize}
+            \item \textbf{Obiettivo:} Analizzare l'impatto di variabili socio-economiche sull'HDI in Africa Sub-Sahariana.
+            \item \textbf{Focus:} Confronto tra Ghana, Nigeria, Senegal e Sudafrica (1990-2022).
+            \item \textbf{Metodologia:} Modello Panel (Effetti Fissi) per catturare le specificità nazionali.
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+% --- SLIDE 2: Domanda 1 ---
+\begin{frame}{Domanda 1: Crescita o Sviluppo?}
+    \textbf{Il PIL è l'unico motore dell'HDI?}
+    \vspace{0.3cm}
+    \begin{enumerate}
+        \item \textbf{Rendimento Decrescente:} Oltre una certa soglia di reddito, l'incremento dell'HDI rallenta.
+        \item \textbf{Disuguaglianza:} In Nigeria, la crescita del PIL non si è tradotta in un miglioramento proporzionale dei servizi.
+        \item \textbf{Fattori Esterni:} Fertilità e mortalità pesano spesso più del reddito.
+    \end{enumerate}
+\end{frame}
+
+% --- SLIDE 3: Variabili ---
+\begin{frame}{Variabili del Modello}
+    \begin{table}
+        \begin{tabular}{lll}
+            \textbf{Variabile} & \textbf{Descrizione} & \textbf{Aspettativa} \\
+            \hline
+            GDP pc & Reddito pro capite & Positiva (+) \\
+            Fertilità & Figli per donna & Negativa (-) \\
+            Water Acc. & Accesso acqua & Positiva (+) \\
+            Electricity & Energia & Positiva (+) \\
+            Mortalità & Infantile & Negativa (-) \\
+        \end{tabular}
+    \end{table}
+\end{frame}
+
+% --- SLIDE 4: VIF ---
+\begin{frame}{Il Problema del VIF e della Mortalità}
+    \begin{itemize}
+        \item \textbf{VIF elevato:} Riscontrato sulla variabile Mortalità.
+        \item \textbf{Interpretazione:} La mortalità è spiegata da Acqua, Elettricità e PIL.
+        \item \textbf{Scelta:} Mantenuta per rappresentare il "risultato finale" delle carenze infrastrutturali.
+    \end{itemize}
+\end{frame}
+
+% --- SLIDE 5: Ghana vs Nigeria ---
+\begin{frame}{Risultati: Ghana vs Nigeria}
+    \begin{columns}
+        \begin{column}{0.5\textwidth}
+            \textbf{Ghana (Success Story)}
+            \begin{itemize}
+                \item Politiche su acqua e istruzione.
+                \item HDI cresciuto costantemente.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \textbf{Nigeria (Paradosso)}
+            \begin{itemize}
+                \item Grande potenza economica.
+                \item Infrastrutture carenti.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% --- SLIDE 6: Infrastrutture ---
+\begin{frame}{Infrastrutture vs Reddito}
+    \begin{block}{Quale pesa di più?}
+        I coefficienti mostrano che \textbf{Acqua} ed \textbf{Elettricità} hanno un impatto superiore alla sola variazione del PIL.
+    \end{block}
+\end{frame}
+
+% --- SLIDE 7: Conclusioni ---
+\begin{frame}{Conclusioni}
+    \begin{itemize}
+        \item \textbf{PIL:} Motore necessario ma non sufficiente.
+        \item \textbf{Policy:} Priorità all'accesso ai servizi di base.
+        \item \textbf{VIF:} Scelta metodologica per non oscurare la mortalità.
+    \end{itemize}
+\end{frame}
+
+% --- Slide finale ---
+\begin{frame}
+    \centering \Huge Grazie per l'attenzione!
+\end{frame}
+```
+
+
+
+
 
 
 # CONFRONTO SUB-SAHARAN AFRICA CON IL MONDO
