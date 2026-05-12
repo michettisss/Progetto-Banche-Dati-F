@@ -25,6 +25,17 @@ execute:
   warning: false
   message: false
 
+--- 
+
+# RIPRODUCIBILITà DEL PROGETTO
+```{r}
+repo <- "https://github.com/michettisss/Progetto-Banche-Dati-F.git"
+```
+
+```{r}
+# Installazione pacchetti necessari
+```
+
 # CONFRONTO SUB-SAHARAN AFRICA CON IL MONDO
 ```{r}
 install.packages("psych")
@@ -880,5 +891,3 @@ ggplot(df, aes(x = log(gdp), y = HDI, color = country)) +
        x = "log(GDP)",
        y = "HDI")
 ```
----
-
