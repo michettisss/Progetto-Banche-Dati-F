@@ -24,17 +24,82 @@ execute:
   echo: false
   warning: false
   message: false
-
 --- 
+
+
+% Definizione colore personalizzato e applicazione
+\definecolor{darkgreen}{RGB}{0,102,51}
+\setbeamercolor{structure}{fg=darkgreen}
+
+% --- Configurazione Link ---
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue
+}
+
+% Footer pulito con numero di pagina
+\setbeamertemplate{footline}[page number]
+
+
 
 # RIPRODUCIBILITà DEL PROGETTO
 ```{r}
 repo <- "https://github.com/michettisss/Progetto-Banche-Dati-F.git"
 ```
 
-```{r}
 # Installazione pacchetti necessari
+```{r}
+# Analisi statistica e descrittiva
+install.packages("psych")    # Per la funzione describe() 
+install.packages("car")      # Per il calcolo del VIF (collinearità)
+install.packages("lmtest")   # Per i test di eteroschedasticità (Breusch-Pagan)
+
+# Gestione e manipolazione dei dati
+install.packages("jsonlite") # Per la lettura dei file .json
+install.packages("readxl")   # Per la lettura dei file Excel .xlsx 
+install.packages("dplyr")    # Per la manipolazione dei dati (pipe %>%, summarise, etc.) 
+install.packages("tidyr")    # Per la formattazione dei dati (pivot_longer)
+
+# Visualizzazione dati
+install.packages("ggplot2")  # Per la creazione di grafici e mappe di calore 
+install.packages("corrplot") # Per la matrice di correlazione grafica 
+
+# Modelli per dati Panel
+install.packages("plm")      # Per i modelli a effetti fissi (within)
+
+# Formattazione tabelle e output
+install.packages("gt")       # Per tabelle HTML eleganti 
+install.packages("xtable")   # Per l'esportazione di tabelle in formato LaTeX/HTML 
+install.packages("tibble")   # Per la gestione dei dataframe e nomi delle righe
 ```
+
+# Richiamo dei pacchetti
+
+```{r}
+# --- Caricamento delle librerie per il progetto Multipoverty ---
+# 1. Gestione File e Dati
+library(jsonlite)  # Lettura file hdr-data.json e simili 
+library(readxl)    # Lettura gdp.xlsx, fert.xlsx, etc. 
+library(dplyr)     # Manipolazione e pipe (%>%)
+library(tidyr)     # Formattazione tabelle (pivot_longer)
+library(tibble)    # Gestione nomi righe e dataframe
+
+# 2. Statistica e Diagnostica
+library(psych)     # Statistiche descrittive (describe) 
+library(car)       # Test collinearità (VIF)
+library(lmtest)    # Test eteroschedasticità (bptest)
+
+# 3. Grafica e Visualizzazione
+library(ggplot2)   # Grafici HDI, GDP, Fertilità, etc.
+library(corrplot)  # Heatmap della matrice di correlazione 
+
+# 4. Modelli Panel e Output
+library(plm)       # Modelli a effetti fissi (within)
+library(gt)        # Creazione tabelle statistiche eleganti
+library(xtable)    # Esportazione coefficienti dei modelli 
+```
+
 
 # CONFRONTO SUB-SAHARAN AFRICA CON IL MONDO
 ```{r}
