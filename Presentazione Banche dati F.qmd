@@ -1,0 +1,368 @@
+---
+title: "Sviluppo Umano nell'Africa Sub-Sahariana"
+subtitle: "Un'analisi comparativa: Nigeria, Ghana, Senegal, Sudafrica"
+author: "Bondi, Dal Ben, Michetti, Proietti, Veronese"
+date: 14/05/26
+lang: it
+format:
+  beamer:
+    theme: metropolis
+    colortheme: default
+    fonttheme: structurebold
+    aspectratio: 169
+    toc: false
+    slide-level: 2
+    header-includes: |
+      \usepackage{booktabs}
+      \definecolor{darkblue}{RGB}{10, 45, 90}
+      \setbeamercolor{frametitle}{bg=darkblue, fg=white}
+      \setbeamercolor{title separator}{fg=darkblue}
+      \setbeamercolor{progress bar}{fg=darkblue}
+      \setbeamerfont{title}{size=\LARGE}
+      \setbeamerfont{subtitle}{size=\large}
+      \setbeamertemplate{footline}{}
+      \setbeamertemplate{navigation symbols}{}
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r setup, include=FALSE}
+# Installazioni (eseguire solo se necessario)
+# install.packages(c("psych","jsonlite","ggplot2","gt","dplyr","tidyr",
+#                    "readxl","plm","car","corrplot","lmtest","xtable"))
+
+library(psych)
+library(jsonlite)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(readxl)
+library(gt)
+library(plm)
+library(car)
+library(corrplot)
+library(lmtest)
+
+# Tema comune per tutti i grafici
+tema <- theme_minimal(base_size = 13) +
+  theme(
+    axis.text.x  = element_text(angle = 45, hjust = 1),
+    legend.position = "bottom",
+    legend.title = element_text(size = 10),
+    plot.title   = element_blank()   # nessun titolo sulle slide grafici
+  )
+```
+
+```{r load-data, include=FALSE}
+# HDI Sub-Saharan Africa e Mondo
+hdi.ssa <- fromJSON("hdr-data.json")[, c(2,8,11)]
+names(hdi.ssa)[names(hdi.ssa) == "value"] <- "HDI"
+hdi.ssa$year <- as.integer(hdi.ssa$year)
+hdi.ssa$HDI  <- as.numeric(hdi.ssa$HDI)
+
+hdi.w <- fromJSON("hdi.world.json")[, c(2,8,11)]
+names(hdi.w)[names(hdi.w) == "value"] <- "HDI"
+hdi.w$year <- as.integer(hdi.w$year)
+hdi.w$HDI  <- as.numeric(hdi.w$HDI)
+
+hdi <- rbind(hdi.ssa, hdi.w)
+
+# HDI paesi
+hdi.sen <- fromJSON("hdi.sen.json")[, c(2,8,11)]
+hdi.nga <- fromJSON("hdi.NGA.json")[, c(2,8,11)]
+hdi.gha <- fromJSON("hdi.gha.json")[, c(2,8,11)]
+hdi.zaf <- fromJSON("hdi.zaf.json")[, c(2,8,11)]
+
+for (d in c("hdi.sen","hdi.nga","hdi.gha","hdi.zaf")) {
+  tmp <- get(d)
+  names(tmp)[names(tmp) == "value"] <- "HDI"
+  tmp$year <- as.integer(tmp$year)
+  tmp$HDI  <- as.numeric(tmp$HDI)
+  assign(d, tmp)
+}
+
+hdi_3 <- rbind(hdi.nga, hdi.gha, hdi.sen, hdi.zaf, hdi.ssa)
+
+# GDP
+gdp <- read_excel("gdp.xlsx")
+gdp <- gdp[c(1:5), c(-1,-2,-4)]
+if ("Country Name" %in% names(gdp)) names(gdp)[names(gdp) == "Country Name"] <- "Country.Name"
+gdp[,-1] <- lapply(gdp[,-1], function(x) as.numeric(as.character(x)))
+gdp_long <- gdp %>% pivot_longer(-Country.Name, names_to="year", values_to="gdp")
+gdp_long$year <- as.integer(sub("\\[.*","",gdp_long$year))
+
+# Fertilità
+fert <- read_excel("fert.xlsx")
+fert <- fert[c(1:4), c(-2,-3,-4)]
+if ("Country Name" %in% names(fert)) names(fert)[names(fert) == "Country Name"] <- "Country.Name"
+fert[,-1] <- lapply(fert[,-1], function(x) as.numeric(as.character(x)))
+fert_long <- fert %>% pivot_longer(-Country.Name, names_to="year", values_to="Fertility")
+fert_long$year <- as.integer(sub("\\[.*","",fert_long$year))
+
+# Acqua
+wat <- read_excel("Acqua.xlsx")
+wat <- wat[c(1:4), c(-2,-3,-4)]
+wat <- wat[, c(1, 12:ncol(wat))]
+if ("Country Name" %in% names(wat)) names(wat)[names(wat) == "Country Name"] <- "Country.Name"
+wat[,-1] <- lapply(wat[,-1], function(x) as.numeric(as.character(x)))
+wat_long <- wat %>% pivot_longer(-Country.Name, names_to="year", values_to="Acqua")
+wat_long$year <- as.integer(sub("\\[.*","",wat_long$year))
+
+# Mortalità
+mort <- read_excel("tasso di mort.xlsx")
+mort <- mort[c(1:8), c(-2,-3,-4)]
+if ("Country Name" %in% names(mort)) names(mort)[names(mort) == "Country Name"] <- "Country.Name"
+mort[,-1] <- lapply(mort[,-1], function(x) as.numeric(as.character(x)))
+mort_long <- mort %>% pivot_longer(-Country.Name, names_to="year", values_to="Mortality")
+mort_long$year <- as.integer(sub("\\[.*","",mort_long$year))
+mort_final <- mort_long %>% group_by(Country.Name, year) %>%
+  summarise(Mortality = mean(Mortality, na.rm=TRUE), .groups="drop")
+
+# Elettricità
+elet <- read_excel("elet.xlsx")
+elet <- elet[c(1:4), c(-2,-3,-4)]
+elet <- elet[, c(1, 8:ncol(elet))]
+if ("Country Name" %in% names(elet)) names(elet)[names(elet) == "Country Name"] <- "Country.Name"
+elet[,-1] <- lapply(elet[,-1], function(x) as.numeric(as.character(x)))
+elet_long <- elet %>% pivot_longer(-Country.Name, names_to="year", values_to="Electricity")
+elet_long$year <- as.integer(sub("\\[.*","",elet_long$year))
+
+# Popolazione
+pop <- read_excel("pop.xlsx")
+pop <- pop[c(1:4), c(-2,-3,-4)]
+if ("Country Name" %in% names(pop)) names(pop)[names(pop) == "Country Name"] <- "Country.Name"
+pop[,-1] <- lapply(pop[,-1], function(x) as.numeric(as.character(x)))
+pop_long <- pop %>% pivot_longer(-Country.Name, names_to="year", values_to="Population")
+pop_long$year <- as.integer(sub("\\[.*","",pop_long$year))
+
+# Investimenti stranieri
+invst <- read_excel("investimenti stranieri.xlsx")
+invst <- invst[c(1:4), c(-2,-3,-4)]
+if ("Country Name" %in% names(invst)) names(invst)[names(invst) == "Country Name"] <- "Country.Name"
+invst[,-1] <- lapply(invst[,-1], function(x) as.numeric(as.character(x)))
+invst_long <- invst %>% pivot_longer(-Country.Name, names_to="year", values_to="Investimenti_Stranieri")
+invst_long$year <- as.integer(sub("\\[.*","",invst_long$year))
+```
+
+```{r build-dataset, include=FALSE}
+# Costruzione dataset finale per paese
+slice_country <- function(df, idx) df[idx, ]
+
+mort.gha <- slice_country(mort_final, 1:34)
+mort.nga <- slice_country(mort_final, 35:68)
+mort.sen <- slice_country(mort_final, 69:102)
+mort.zaf <- slice_country(mort_final, 103:136)
+
+elet.gha <- slice_country(elet_long, 1:28)
+elet.nga <- slice_country(elet_long, 57:84)
+elet.sen <- slice_country(elet_long, 85:112)
+elet.zaf <- slice_country(elet_long, 29:56)
+
+gdp.gha <- slice_country(gdp_long, 1:34)
+gdp.nga <- slice_country(gdp_long, 35:68)
+gdp.sen <- slice_country(gdp_long, 69:102)
+gdp.zaf <- slice_country(gdp_long, 103:136)
+
+invst.gha <- slice_country(invst_long, 1:34)
+invst.nga <- slice_country(invst_long, 35:68)
+invst.sen <- slice_country(invst_long, 69:102)
+invst.zaf <- slice_country(invst_long, 103:136)
+
+pop.gha <- slice_country(pop_long, 35:68)
+pop.nga <- slice_country(pop_long, 103:136)
+pop.sen <- slice_country(pop_long, 1:34)
+pop.zaf <- slice_country(pop_long, 69:102)
+
+wat.gha <- slice_country(wat_long, 25:48)
+wat.nga <- slice_country(wat_long, 1:24)
+wat.sen <- slice_country(wat_long, 49:72)
+wat.zaf <- slice_country(wat_long, 73:96)
+
+fert.gha <- slice_country(fert_long, 35:68)
+fert.nga <- slice_country(fert_long, 69:102)
+fert.sen <- slice_country(fert_long, 1:34)
+fert.zaf <- slice_country(fert_long, 103:136)
+
+merge_country <- function(hdi_df, mort_df, elet_df, fert_df,
+                           gdp_df, pop_df, wat_df, invst_df) {
+  Reduce(function(x,y) merge(x, y, by="year"),
+    list(hdi_df,
+         mort_df[,c(2,3)], elet_df[,c(2,3)], fert_df[,c(2,3)],
+         gdp_df[,c(2,3)],  pop_df[,c(2,3)],  wat_df[,c(2,3)],
+         invst_df[,c(2,3)]))
+}
+
+gha  <- merge_country(hdi.gha, mort.gha, elet.gha, fert.gha, gdp.gha, pop.gha, wat.gha, invst.gha)
+sen  <- merge_country(hdi.sen, mort.sen, elet.sen, fert.sen, gdp.sen, pop.sen, wat.sen, invst.sen)
+nga  <- merge_country(hdi.nga, mort.nga, elet.nga, fert.nga, gdp.nga, pop.nga, wat.nga, invst.nga)
+zaf  <- merge_country(hdi.zaf, mort.zaf, elet.zaf, fert.zaf, gdp.zaf, pop.zaf, wat.zaf, invst.zaf)
+
+data <- rbind(gha, sen, nga, zaf)
+pdata <- pdata.frame(data, index = c("country", "year"))
+```
+
+
+## Obiettivi dell'analisi
+
+\begin{itemize}
+  \item Confrontare l'andamento dell'\textbf{Indice di Sviluppo Umano (HDI)} nell'Africa Sub-Sahariana rispetto al resto del mondo (1990--2023)
+  \item Analizzare le differenze tra \textbf{Nigeria, Ghana, Senegal e Sudafrica} su indicatori chiave: PIL, fertilità, acqua, elettricità, mortalità
+  \item Stimare l'effetto causale dei determinanti dell'HDI tramite \textbf{modelli a effetti fissi} con interazioni per paese
+  \item Valutare l'impatto di eventi di crisi (\textbf{2008, COVID-19}) sullo sviluppo umano
+\end{itemize}
+
+\vspace{0.5em}
+\textit{Dati: UNDP Human Development Report, World Bank Open Data}
+
+
+## HDI - Africa Sub-Sahariana vs Mondo
+
+```{r plot-hdi-world, fig.width=10, fig.height=5.5, out.width="100%"}
+ggplot(hdi, aes(x = year, y = HDI, color = country)) +
+  geom_line(size = 1.4) +
+  scale_x_continuous(breaks = seq(1990, 2023, by = 5)) +
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = 0.05)) +
+  scale_color_manual(values = c("#0A2D5A", "#E07B39")) +
+  labs(x = "Anno", y = "HDI", color = NULL) +
+  tema
+```
+
+## Confronto tra i quattro paesi
+
+```{r plot-hdi-4paesi, fig.width=10, fig.height=5.5, out.width="100%"}
+palette4 <- c("#0A2D5A","#E07B39","#2C8C4A","#C0392B","#888888")
+
+ggplot(hdi_3, aes(x = year, y = HDI, color = country)) +
+  geom_line(size = 1.4) +
+  scale_x_continuous(breaks = seq(1990, 2023, by = 5)) +
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = 0.05)) +
+  scale_color_manual(values = palette4) +
+  labs(x = "Anno", y = "HDI", color = NULL) +
+  tema
+```
+
+## PIL pro capite
+
+```{r plot-gdp, fig.width=10, fig.height=5.5, out.width="100%"}
+ggplot(gdp_long, aes(x = year, y = gdp, color = Country.Name)) +
+  geom_line(size = 1.4) +
+  scale_color_manual(values = palette4) +
+  labs(x = "Anno", y = "GDP pro capite (US$ correnti)", color = NULL) +
+  tema
+```
+
+## Tasso di fertilità
+
+```{r plot-fert, fig.width=10, fig.height=5.5, out.width="100%"}
+ggplot(fert_long, aes(x = year, y = Fertility, color = Country.Name)) +
+  geom_line(size = 1.4) +
+  scale_color_manual(values = palette4) +
+  labs(x = "Anno", y = "Figli per donna", color = NULL) +
+  tema
+```
+
+## Accesso all'acqua potabile
+
+```{r plot-acqua, fig.width=10, fig.height=5.5, out.width="100%"}
+ggplot(wat_long, aes(x = year, y = Acqua, color = Country.Name)) +
+  geom_line(size = 1.4) +
+  scale_color_manual(values = palette4) +
+  labs(x = "Anno", y = "% popolazione con accesso", color = NULL) +
+  tema
+```
+
+## Tasso di mortalità
+
+```{r plot-mort, fig.width=10, fig.height=5.5, out.width="100%"}
+ggplot(mort_final, aes(x = year, y = Mortality, color = Country.Name)) +
+  geom_line(size = 1.4) +
+  scale_color_manual(values = palette4) +
+  labs(x = "Anno", y = "Tasso di mortalità", color = NULL) +
+  tema
+```
+
+## Accesso all'elettricità
+
+```{r plot-elet, fig.width=10, fig.height=5.5, out.width="100%"}
+ggplot(elet_long, aes(x = year, y = Electricity, color = Country.Name)) +
+  geom_line(size = 1.4) +
+  scale_color_manual(values = palette4) +
+  labs(x = "Anno", y = "% popolazione con accesso", color = NULL) +
+  tema
+```
+
+## Investimenti Diretti Esteri
+
+```{r plot-invst, fig.width=10, fig.height=5.5, out.width="100%"}
+ggplot(invst_long, aes(x = year, y = Investimenti_Stranieri, color = Country.Name)) +
+  geom_line(size = 1.4) +
+  scale_color_manual(values = palette4) +
+  labs(x = "Anno", y = "FDI netti (% PIL)", color = NULL) +
+  tema
+```
+
+## Modelli econometrici: Strategia di stima
+
+\begin{itemize}
+  \item \textbf{Modello a effetti fissi (PLM)} — controlla per eterogeneità non osservata stabile nel tempo
+  \item \textbf{Interazioni variabile $\times$ paese} — slope eterogenei: ogni paese reagisce diversamente ai regressori
+  \item \textbf{Errori standard robusti (HC1)} — correggono per eteroschedasticità
+  \item Variabili incluse: mortalità, elettricità, fertilità, $\log(\text{GDP})$, accesso all'acqua, FDI
+\end{itemize}
+
+\vspace{0.4em}
+\textbf{Modello 2} aggiunge dummy di crisi: \textit{crisi finanziaria 2008--09} e \textit{COVID-19 2020--21}
+
+## {.plain}
+
+```{r plot-gdp-hdi, fig.width=10, fig.height=5.5, out.width="100%"}
+df <- as.data.frame(pdata)
+ggplot(df, aes(x = log(gdp), y = HDI, color = country)) +
+  geom_point(alpha = 0.5, size = 1.8) +
+  geom_smooth(method = "lm", se = FALSE, size = 1.2) +
+  scale_color_manual(values = palette4) +
+  labs(x = "log(GDP pro capite)", y = "HDI", color = NULL) +
+  tema
+```
+
+## {.plain}
+
+```{r plot-corrplot, fig.width=8, fig.height=6, out.width="88%", fig.align="center"}
+vars <- data[, c("Mortality","Electricity","Fertility","gdp",
+                 "Population","Acqua","Investimenti_Stranieri")]
+cor_matrix <- cor(vars, use = "complete.obs")
+corrplot(cor_matrix,
+         method   = "color",
+         type     = "upper",
+         tl.cex   = 0.85,
+         tl.col   = "black",
+         addCoef.col = "black",
+         number.cex  = 0.65,
+         col      = colorRampPalette(c("#C0392B","white","#0A2D5A"))(200))
+```
+
+## Risultati principali
+
+\begin{itemize}
+  \item L'Africa Sub-Sahariana ha migliorato l'HDI dal 1990, ma il \textbf{divario con il livello mondiale rimane ampio}
+  \item Il \textbf{Sudafrica} registra l'HDI più alto tra i quattro paesi; la \textbf{Nigeria} il più basso — nonostante il PIL pro capite più elevato della Nigeria rispetto a Ghana e Senegal in alcuni periodi
+  \item Il $\log(\text{GDP})$ e la \textbf{fertilità} sono i determinanti con effetti più robusti sull'HDI, ma con pendenze eterogenee per paese
+  \item \textbf{Multicollinearità elevata} (VIF $\gg$ 10): mortalità, elettricità e accesso all'acqua sono proxy correlate delle stesse condizioni di sviluppo $\Rightarrow$ modello semplificato preferibile
+  \item Le crisi 2008 e COVID-19 hanno avuto impatti differenziati: la Nigeria e il Senegal mostrano maggiore vulnerabilità agli shock esterni
+\end{itemize}
+
+## Limiti e sviluppi futuri
+
+\begin{itemize}
+  \item Campione ridotto (4 paesi, 34 anni): potere statistico limitato per i test di diagnostica
+  \item Possibile \textbf{autocorrelazione seriale} nei residui — stimatori GMM come alternativa
+  \item Estendere l'analisi ad altri paesi dell'Africa Sub-Sahariana per una maggiore generalizzabilità
+  \item Includere variabili istituzionali (governance, rule of law) come determinanti non economici dell'HDI
+\end{itemize}
+
+\vspace{0.5em}
+\begin{center}
+\textit{Grazie per l'attenzione}
+\end{center}
