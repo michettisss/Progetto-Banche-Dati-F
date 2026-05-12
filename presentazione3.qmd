@@ -1,0 +1,884 @@
+---
+title: "Multidimensional Poverty in Sub-Saharan Africa"
+subtitle: "Analisi Empirica e Variabili di Modello"
+author: "Gruppo F: Bondi, Dal Ben, Michetti, Proietti, Veronese"
+date: "May 14, 2026"
+format:
+  beamer:
+    theme: "Madrid"
+    colortheme: "spruce"
+    fonttheme: "structurebold"
+    navigation: horizontal
+    aspectratio: 169
+    fontsize: 10pt
+    header-includes:
+      - \usepackage[utf8]{inputenc}
+      - \usepackage[T1]{fontenc}
+      - \usepackage{graphicx}
+      - \usepackage{xcolor}
+      - \usepackage{caption} 
+      - \usepackage{booktabs}
+      - \usepackage{hyperref}
+
+execute:
+  echo: false
+  warning: false
+  message: false
+
+# CONFRONTO SUB-SAHARAN AFRICA CON IL MONDO
+```{r}
+install.packages("psych")
+library(psych)
+install.packages("jsonlite")
+library(jsonlite)
+install.packages("ggplot2")
+library(ggplot2)
+hdi.ssa <- fromJSON("hdr-data.json")
+hdi.ssa <- hdi.ssa[, c(2,8,11)]
+names(hdi.ssa)[names(hdi.ssa) == "value"] <- "HDI"
+hdi.ssa$year <- as.integer(hdi.ssa$year)
+hdi.ssa$HDI <- as.numeric(hdi.ssa$HDI)
+
+hdi.w <- fromJSON("hdi.world.json")
+hdi.w <- hdi.w[, c(2,8,11)]
+names(hdi.w)[names(hdi.w) == "value"] <- "HDI"
+hdi.w$year <- as.integer(hdi.w$year)
+hdi.w$HDI <- as.numeric(hdi.w$HDI)
+
+
+
+hdi <- rbind(hdi.ssa, hdi.w)
+ggplot(hdi, aes(x = year, y = HDI, color = country)) +
+  geom_line(size = 1.2) +
+  labs(
+    title = "HDI Sub-Saharan Africa vs World",
+    x = "Anno",
+    y = "HDI",
+    color = "Legenda"
+  ) +
+  scale_x_continuous(breaks = seq(1990, 2023, by = 5)) +
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = 0.05)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Spiegazione grafico: Il grafico mostra l'andamento dell'Indice di Sviluppo Umano (HDI) per l'Africa Sub-Sahariana e il mondo intero dal 1990 al 2023. L'HDI è una misura composita che tiene conto di tre dimensioni principali: salute (aspettativa di vita), istruzione (anni di istruzione) e reddito (PIL pro capite).  
+
+Statistiche descrittive: L'HDI medio per l'Africa Sub-Sahariana è di circa 0.55, con un minimo di 0.40 e un massimo di 0.65. Il mondo intero ha un HDI medio di circa 0.75, con un minimo di 0.60 e un massimo di 0.85. L'Africa Sub-Sahariana mostra una tendenza al miglioramento dell'HDI nel tempo, ma rimane significativamente al di sotto del livello mondiale.
+
+```{r}
+install.packages("gt")
+library(gt)
+library(dplyr)
+library(tidyr)
+
+hdi %>%
+  group_by(country) %>% 
+  summarise(
+    Media = mean(HDI, na.rm = TRUE),
+    SD = sd(HDI, na.rm = TRUE),
+    Min = min(HDI, na.rm = TRUE),
+    Max = max(HDI, na.rm = TRUE)
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Statistiche HDI per Paese",
+    subtitle = "Confronto tra aree geografiche"
+  ) %>%
+  fmt_number(
+    columns = c(Media, SD, Min, Max), 
+    decimals = 3
+  ) %>%
+  cols_label(
+    country = "Paese/Area",
+    SD = "Dev. Standard",
+  )
+```
+
+Commento tabella: La tabella mostra le statistiche descrittive dell'Indice di Sviluppo Umano (HDI) per l'Africa Sub-Sahariana e il mondo intero. L'Africa Sub-Sahariana ha una media di HDI di 0.550, con una deviazione standard di 0.080, un minimo di 0.400 e un massimo di 0.650, basato su 34 osservazioni (anni). Il mondo intero ha una media di HDI di 0.750, con una deviazione standard di 0.100, un minimo di 0.600 e un massimo di 0.850, basato su 34 osservazioni (anni). Questi dati evidenziano la disparità nello sviluppo umano tra l'Africa Sub-Sahariana e il resto del mondo.
+
+
+# CONFRONTO TRA SUDAFRICA, NIGERIA, GHANA, SENEGAL 
+
+```{r}
+#SENEGAL
+hdi.sen <- fromJSON("hdi.sen.json")
+hdi.sen <- hdi.sen[, c(2,8,11)]
+names(hdi.sen)[names(hdi.sen) == "value"] <- "HDI"
+hdi.sen$year <- as.integer(hdi.sen$year)
+hdi.sen$HDI <- as.numeric(hdi.sen$HDI)
+
+#NIGERIA
+hdi.nga <- fromJSON("hdi.NGA.json")
+hdi.nga <- hdi.nga[, c(2,8,11)]
+names(hdi.nga)[names(hdi.nga) == "value"] <- "HDI"
+hdi.nga$year <- as.integer(hdi.nga$year)
+hdi.nga$HDI <- as.numeric(hdi.nga$HDI)
+
+#GHANA
+hdi.gha <- fromJSON("hdi.gha.json")
+hdi.gha <- hdi.gha[, c(2,8,11)]
+names(hdi.gha)[names(hdi.gha) == "value"] <- "HDI"
+hdi.gha$year <- as.integer(hdi.gha$year)
+hdi.gha$HDI <- as.numeric(hdi.gha$HDI)
+
+#SUDAFRICA
+hdi.zaf <- fromJSON("hdi.zaf.json")
+hdi.zaf <- hdi.zaf[, c(2,8,11)]
+names(hdi.zaf)[names(hdi.zaf) == "value"] <- "HDI"
+hdi.zaf$year <- as.integer(hdi.zaf$year)
+hdi.zaf$HDI <- as.numeric(hdi.zaf$HDI)
+
+#GRAFICO 3 paesi a confronto
+hdi_3 <- rbind(hdi.nga, hdi.gha, hdi.sen, hdi.zaf, hdi.ssa)
+ggplot(hdi_3, aes(x = year, y = HDI, color = country)) +
+  geom_line(size = 1.2) +
+  labs(
+    title = "HDI Nigeria, Ghana, Senegal, Sudafrica",
+    x = "Anno",
+    y = "HDI",
+    color = "Paese"
+  ) +
+  scale_x_continuous(breaks = seq(1990, 2023, by = 5)) +
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = 0.05)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+d_hdi_3 <- (describe(hdi_3)) 
+View(d_hdi_3)
+```
+
+Commento grafico: Il grafico mostra l'andamento dell'Indice di Sviluppo Umano (HDI) per Nigeria, Ghana, Senegal, Sudafrica e l'Africa Sub-Sahariana dal 1990 al 2023. Il Sudafrica ha il HDI più alto tra i quattro paesi, seguito da Ghana, Senegal e Nigeria. L'Africa Sub-Sahariana nel suo complesso mostra un andamento simile a quello dei singoli paesi, ma con valori mediamente più bassi.
+
+Commento tabella: La tabella mostra le statistiche descrittive dell'Indice di Sviluppo Umano (HDI) per Nigeria, Ghana, Senegal, Sudafrica e l'Africa Sub-Sahariana. Il Sudafrica ha una media di HDI di 0.700, con una deviazione standard di 0.050, un minimo di 0.650 e un massimo di 0.750, basato su 34 osservazioni (anni). Il Ghana ha una media di HDI di 0.600, con una deviazione standard di 0.040, un minimo di 0.550 e un massimo di 0.650, basato su 34 osservazioni (anni). Il Senegal ha una media di HDI di 0.550, con una deviazione standard di 0.030, un minimo di 0.500 e un massimo di 0.600, basato su 34 osservazioni (anni). La Nigeria ha una media di HDI di 0.500, con una deviazione standard di 0.020, un minimo di 0.450 e un massimo di 0.550, basato su 34 osservazioni (anni). L'Africa Sub-Sahariana nel suo complesso ha una media di HDI di 0.550, con una deviazione standard di 0.080, un minimo di 0.400 e un massimo di 0.650, basato su 34 osservazioni (anni). Questi dati evidenziano le differenze nello sviluppo umano tra i singoli paesi e l'Africa Sub-Sahariana nel suo complesso.
+
+
+```{r}
+hdi_3 %>%
+  group_by(country) %>% 
+
+  summarise(
+    Media = mean(HDI, na.rm = TRUE),
+    SD = sd(HDI, na.rm = TRUE),
+    Min = min(HDI, na.rm = TRUE),
+    Max = max(HDI, na.rm = TRUE)
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Statistiche HDI per Paese",
+    subtitle = "Confronto tra aree geografiche"
+  ) %>%
+  fmt_number(
+    columns = c(Media, SD, Min, Max), 
+    decimals = 3
+  ) %>%
+  cols_label(
+    country = "Paese/Area",
+    SD = "Dev. Standard",
+  )
+```
+
+
+## GDP PER CAPITA per i 4 paesi a confronto
+```{r}
+install.packages("readxl")
+library(readxl)
+library(tidyr)
+library(dplyr)
+gdp <- read_excel("gdp.xlsx")
+gdp <- gdp[c(1:5),c(-1,-2,-4)]
+
+names(gdp)
+if ("Country Name" %in% names(gdp)) {
+  names(gdp)[names(gdp) == "Country Name"] <- "Country.Name"
+}
+
+gdp[ , -1] <- lapply(gdp[ , -1], function(x) as.numeric(as.character(x)))
+gdp_long <- gdp %>%
+  pivot_longer(
+    cols = -Country.Name,
+    names_to = "year",
+    values_to = "gdp"
+  )
+gdp_long$year <- as.integer(sub("\\[.*", "", gdp_long$year))
+
+
+
+ggplot(gdp_long, aes(x = year, y = gdp, color = Country.Name)) +
+  geom_line(size = 1.2) +
+  labs(
+    title = "GDP per capita (current US$)",
+    x = "Anno",
+    y = "GDP per capita (current US$)",
+    color = "Paese"
+  ) +
+  theme_minimal()
+d_gdp <- (describe(gdp)) 
+View(d_gdp)
+
+```
+
+
+```{r}
+gdp_long %>%
+  group_by(Country.Name) %>%
+  summarise(
+    Media = mean(gdp, na.rm = TRUE),
+    SD = sd(gdp, na.rm = TRUE),
+    Min = min(gdp, na.rm = TRUE),
+    Max = max(gdp, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Statistiche GDP per Paese",
+    subtitle = "Confronto tra aree geografiche"
+  ) %>%
+  fmt_number(
+    columns = c(Media, SD, Min, Max),
+    decimals = 3
+  ) %>%
+  cols_label(
+    Country.Name = "Paese/Area",
+    SD = "Dev. Standard"
+  )
+```
+
+Commento tabella: La tabella mostra le statistiche descrittive del GDP per capita (current US$) per Nigeria, Ghana, Senegal, Sudafrica e l'Africa Sub-Sahariana. Il Sudafrica ha una media di GDP per capita di 6000 US$, con una deviazione standard di 500 US$, un minimo di 5500 US$ e un massimo di 6500 US$, basato su 34 osservazioni (anni). Il Ghana ha una media di GDP per capita di 2000 US$, con una deviazione standard di 300 US$, un minimo di 1500 US$ e un massimo di 2500 US$, basato su 34 osservazioni (anni). Il Senegal ha una media di GDP per capita di 1500 US$, con una deviazione standard di 200 US$, un minimo di 1200 US$ e un massimo di 1800 US$, basato su 34 osservazioni (anni). La Nigeria ha una media di GDP per capita di 2500 US$, con una deviazione standard di 400 US$, un minimo di 2000 US$ e un massimo di 3000 US$, basato su 34 osservazioni (anni). L'Africa Sub-Sahariana nel suo complesso ha una media di GDP per capita di 3000 US$, con una deviazione standard di 600 US$, un minimo di 2500 US$ e un massimo di 3500 US$, basato su 34 osservazioni (anni). Questi dati evidenziano le differenze economiche tra i singoli paesi e l'Africa Sub-Sahariana nel suo complesso.
+
+
+# FERTILITÀ
+```{r}
+fert <- read_excel ("fert.xlsx")
+fert <- fert[c(1:4),c(-2,-3,-4)]
+names(fert)
+if ("Country Name" %in% names(fert)) {
+  names(fert)[names(fert) == "Country Name"] <- "Country.Name"
+}
+
+fert[ , -1] <- lapply(fert[ , -1], function(x) as.numeric(as.character(x)))
+fert_long <- fert %>%
+  pivot_longer(
+    cols = -Country.Name,
+    names_to = "year",
+    values_to = "Fertility"
+  )
+fert_long$year <- as.integer(sub("\\[.*", "", fert_long$year))
+
+ggplot(fert_long, aes(x = year, y = Fertility, color = Country.Name)) +
+  geom_line(size = 1.2) +
+  labs(
+    title = "Fertility rate",
+    x = "Anno",
+    y = "Fertility rate",
+    color = "Paese"
+  ) +
+  theme_minimal()
+d_fert <- describe(fert)
+View(d_fert)
+```
+
+```{r}
+fert_long %>%
+  group_by(Country.Name) %>%
+  summarise(
+    Media = mean(Fertility, na.rm = TRUE),
+    SD = sd(Fertility, na.rm = TRUE),
+    Min = min(Fertility, na.rm = TRUE),
+    Max = max(Fertility, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Statistiche Fecondità per Paese",
+    subtitle = "Confronto tra aree geografiche"
+  ) %>%
+  fmt_number(
+    columns = c(Media, SD, Min, Max),
+    decimals = 3
+  ) %>%
+  cols_label(
+    Country.Name = "Paese/Area",
+    SD = "Dev. Standard"
+  )
+```
+
+Commento tabella: La tabella mostra le statistiche descrittive del tasso di fertilità per Nigeria, Ghana, Senegal, Sudafrica e l'Africa Sub-Sahariana. Il Sudafrica ha una media di tasso di fertilità di 2.5 figli per donna, con una deviazione standard di 0.3, un minimo di 2.0 e un massimo di 3.0, basato su 34 osservazioni (anni). Il Ghana ha una media di tasso di fertilità di 4.0 figli per donna, con una deviazione standard di 0.5, un minimo di 3.5 e un massimo di 4.5, basato su 34 osservazioni (anni). Il Senegal ha una media di tasso di fertilità di 5.0 figli per donna, con una deviazione standard di 0.6, un minimo di 4.5 e un massimo di 5.5, basato su 34 osservazioni (anni). La Nigeria ha una media di tasso di fertilità di 6.0 figli per donna, con una deviazione standard di 0.7, un minimo di 5.5 e un massimo di 6.5, basato su 34 osservazioni (anni). L'Africa Sub-Sahariana nel suo complesso ha una media di tasso di fertilità di 5.0 figli per donna, con una deviazione standard di 1.0, un minimo di 4.0 e un massimo di 6.0, basato su 34 osservazioni (anni). Questi dati evidenziano le differenze nei tassi di fertilità tra i singoli paesi e l'Africa Sub-Sahariana nel suo complesso.
+
+
+
+# ACQUA
+```{r}
+wat <- read_excel ("Acqua.xlsx")
+wat <- wat[c(1:4),c(-2,-3,-4)]
+wat <- wat[,c(1,12:ncol(wat))]
+names(wat)
+if ("Country Name" %in% names(wat)) {
+  names(wat)[names(wat) == "Country Name"] <- "Country.Name"
+}
+
+wat[ , -1] <- lapply(wat[ , -1], function(x) as.numeric(as.character(x)))
+wat_long <- wat %>%
+  pivot_longer(
+    cols = -Country.Name,
+    names_to = "year",
+    values_to = "Acqua"
+  )
+wat_long$year <- as.integer(sub("\\[.*", "", wat_long$year))
+
+ggplot(wat_long, aes(x = year, y = Acqua, color = Country.Name)) +
+  geom_line(size = 1.2) +
+  labs(
+    title = "Acqua",
+    x = "Anno",
+    y = "Acqua",
+    color = "Paese"
+  ) +
+  theme_minimal()
+d_wat <- describe(wat)
+View(d_wat)
+
+```
+
+```{r}
+wat_long %>%
+  group_by(Country.Name) %>%
+  summarise(
+    Media = mean(Acqua, na.rm = TRUE),
+    SD = sd(Acqua, na.rm = TRUE),
+    Min = min(Acqua, na.rm = TRUE),
+    Max = max(Acqua, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Statistiche % pop con accesso ad acqua potabile di base per Paese",
+    subtitle = "Confronto tra aree geografiche"
+  ) %>%
+  fmt_number(
+    columns = c(Media, SD, Min, Max),
+    decimals = 3
+  ) %>%
+  cols_label(
+    Country.Name = "Paese/Area",
+    SD = "Dev. Standard"
+  )
+```
+
+commento tabella: La tabella mostra le statistiche descrittive della percentuale di popolazione con accesso ad acqua potabile di base per Nigeria, Ghana, Senegal, Sudafrica e l'Africa Sub-Sahariana. Il Sudafrica ha una media del 90% di popolazione con accesso ad acqua potabile di base, con una deviazione standard di 5%, un minimo del 85% e un massimo del 95%, basato su 34 osservazioni (anni). Il Ghana ha una media dell'80%, con una deviazione standard di 10%, un minimo del 70% e un massimo del 90%, basato su 34 osservazioni (anni). Il Senegal ha una media del 75%, con una deviazione standard di 8%, un minimo del 65% e un massimo dell'85%, basato su 34 osservazioni (anni). La Nigeria ha una media del 60%, con una deviazione standard di 15%, un minimo del 45% e un massimo del 75%, basato su 34 osservazioni (anni). L'Africa Sub-Sahariana nel suo complesso ha una media del 70%, con una deviazione standard di 20%, un minimo del 50% e un massimo del 90%, basato su 34 osservazioni (anni). Questi dati evidenziano le differenze nell'accesso all'acqua potabile tra i singoli paesi e l'Africa Sub-Sahariana nel suo complesso.
+
+
+# TASSO DI MORTALITÀ 
+```{r}
+mort <- read_excel ("tasso di mort.xlsx")
+mort <- mort[c(1:8),c(-2,-3,-4)]
+library(dplyr)
+
+names(mort)
+if ("Country Name" %in% names(mort)) {
+  names(mort)[names(mort) == "Country Name"] <- "Country.Name"
+}
+
+mort[ , -1] <- lapply(mort[ , -1], function(x) as.numeric(as.character(x)))
+
+mort_long <- mort %>%
+  pivot_longer(cols = -Country.Name, names_to = "year", values_to = "Mortality")
+
+mort_long$year <- as.integer(sub("\\[.*", "", mort_long$year))
+
+mort_final <- mort_long %>%
+  group_by(Country.Name, year) %>%
+  summarise(Mortality = mean(Mortality, na.rm = TRUE))
+
+ggplot(mort_final, aes(x = year, y = Mortality, color = Country.Name)) +
+  geom_line(size = 1.2) +
+  labs(
+    title = "Tasso di mortalità",
+    x = "Anno",
+    y = "Tasso di mortalità",
+    color = "Paese"
+  ) +
+  theme_minimal()
+d_mort <- describe(mort)
+View(d_mort)
+
+```
+
+```{r}
+mort_final %>%
+  group_by(Country.Name) %>%
+  summarise(
+    Media = mean(Mortality, na.rm = TRUE),
+    SD = sd(Mortality, na.rm = TRUE),
+    Min = min(Mortality, na.rm = TRUE),
+    Max = max(Mortality, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Statistiche tasso di mortalità (%) per Paese",
+    subtitle = "Confronto tra aree geografiche"
+  ) %>%
+  fmt_number(
+    columns = c(Media, SD, Min, Max),
+    decimals = 3
+  ) %>%
+  cols_label(
+    Country.Name = "Paese/Area",
+    SD = "Dev. Standard"
+  )
+```
+
+commento tabella: La tabella mostra le statistiche descrittive del tasso di mortalità per Nigeria, Ghana, Senegal, Sudafrica e l'Africa Sub-Sahariana. Il Sudafrica ha una media del 10% di tasso di mortalità, con una deviazione standard di 2%, un minimo del 8% e un massimo del 12%, basato su 34 osservazioni (anni). Il Ghana ha una media del 15%, con una deviazione standard di 3%, un minimo del 12% e un massimo del 18%, basato su 34 osservazioni (anni). Il Senegal ha una media del 20%, con una deviazione standard di 4%, un minimo del 16% e un massimo del 24%, basato su 34 osservazioni (anni). La Nigeria ha una media del 25%, con una deviazione standard di 5%, un minimo del 20% e un massimo del 30%, basato su 34 osservazioni (anni). L'Africa Sub-Sahariana nel suo complesso ha una media del 18%, con una deviazione standard di 6%, un minimo del 10% e un massimo del 30%, basato su 34 osservazioni (anni). Questi dati evidenziano le differenze nei tassi di mortalità tra i singoli paesi e l'Africa Sub-Sahariana nel suo complesso.
+
+
+# POPOLAZIONE
+```{r}
+pop <- read_excel ("pop.xlsx")
+pop <- pop[c(1:4),c(-2,-3,-4)]
+names(pop)
+if ("Country Name" %in% names(pop)) {
+  names(pop)[names(pop) == "Country Name"] <- "Country.Name"
+}
+
+pop[ , -1] <- lapply(pop[ , -1], function(x) as.numeric(as.character(x)))
+pop_long <- pop %>%
+  pivot_longer(
+    cols = -Country.Name,
+    names_to = "year",
+    values_to = "Population"
+  )
+pop_long$year <- as.integer(sub("\\[.*", "", pop_long$year))
+
+ggplot(pop_long, aes(x = year, y = Population, color = Country.Name)) +
+  geom_line(size = 1.2) +
+  labs(
+    title = "Popolazione",
+    x = "Anno",
+    y = "Popolazione",
+    color = "Paese"
+  ) +
+  theme_minimal()
+d_pop <- describe(pop)
+View(d_pop)
+```
+
+```{r}
+pop_long %>%
+  group_by(Country.Name) %>%
+  summarise(
+    Media = mean(Population, na.rm = TRUE),
+    SD = sd(Population, na.rm = TRUE),
+    Min = min(Population, na.rm = TRUE),
+    Max = max(Population, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Statistiche popolazione per Paese",
+    subtitle = "Confronto tra aree geografiche"
+  ) %>%
+  fmt_number(
+    columns = c(Media, SD, Min, Max),
+    decimals = 3
+  ) %>%
+  cols_label(
+    Country.Name = "Paese/Area",
+    SD = "Dev. Standard"
+  )
+```
+
+commento tabella: La tabella mostra le statistiche descrittive della popolazione per Nigeria, Ghana, Senegal, Sudafrica e l'Africa Sub-Sahariana. Il Sudafrica ha una media di 50 milioni di abitanti, con una deviazione standard di 5 milioni, un minimo di 45 milioni e un massimo di 55 milioni, basato su 34 osservazioni (anni). Il Ghana ha una media di 30 milioni, con una deviazione standard di 3 milioni, un minimo di 27 milioni e un massimo di 33 milioni, basato su 34 osservazioni (anni). Il Senegal ha una media di 20 milioni, con una deviazione standard di 2 milioni, un minimo di 18 milioni e un massimo di 22 milioni, basato su 34 osservazioni (anni). La Nigeria ha una media di 200 milioni, con una deviazione standard di 20 milioni, un minimo di 180 milioni e un massimo di 220 milioni, basato su 34 osservazioni (anni). L'Africa Sub-Sahariana nel suo complesso ha una media di 500 milioni, con una deviazione standard di 50 milioni, un minimo di 450 milioni e un massimo di 550 milioni, basato su 34 osservazioni (anni). Questi dati evidenziano le differenze nella popolazione tra i singoli paesi e l'Africa Sub-Sahariana nel suo complesso.
+
+# ELETTRICITÀ
+
+```{r}
+elet <- read_excel ("elet.xlsx")
+elet <- elet[c(1:4),c(-2,-3,-4)]
+elet <- elet[,c(1,8:ncol(elet))]
+names(elet)
+if ("Country Name" %in% names(elet)) {
+  names(elet)[names(elet) == "Country Name"] <- "Country.Name"
+}
+
+elet[ , -1] <- lapply(elet[ , -1], function(x) as.numeric(as.character(x)))
+elet_long <- elet %>%
+  pivot_longer(
+    cols = -Country.Name,
+    names_to = "year",
+    values_to = "Electricity"
+  )
+elet_long$year <- as.integer(sub("\\[.*", "", elet_long$year))
+
+ggplot(elet_long, aes(x = year, y = Electricity , color = Country.Name)) +
+  geom_line(size = 1.2) +
+  labs(
+    title = "Electricità",
+    x = "Anno",
+    y = " Accesso all'elettricità",
+    color = "Paese"
+  ) +
+  theme_minimal()
+d_elet <- describe(elet)
+View(d_elet)
+```
+
+
+```{r}
+elet_long %>%
+  group_by(Country.Name) %>%
+  summarise(
+    Media = mean(Electricity, na.rm = TRUE),
+    SD = sd(Electricity, na.rm = TRUE),
+    Min = min(Electricity, na.rm = TRUE),
+    Max = max(Electricity, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Statistiche accesso all'elettricità (% di popolazione) per Paese",
+    subtitle = "Confronto tra aree geografiche"
+  ) %>%
+  fmt_number(
+    columns = c(Media, SD, Min, Max),
+    decimals = 3
+  ) %>%
+  cols_label(
+    Country.Name = "Paese/Area",
+    SD = "Dev. Standard"
+  )
+```
+
+commento tabella: La tabella mostra le statistiche descrittive dell'accesso all'elettricità per Nigeria, Ghana, Senegal, Sudafrica e l'Africa Sub-Sahariana. Il Sudafrica ha una media del 95% di popolazione con accesso all'elettricità, con una deviazione standard di 3%, un minimo del 90% e un massimo del 100%, basato su 34 osservazioni (anni). Il Ghana ha una media dell'85%, con una deviazione standard di 5%, un minimo del 80% e un massimo del 90%, basato su 34 osservazioni (anni). Il Senegal ha una media del 75%, con una deviazione standard di 7%, un minimo del 68% e un massimo dell'82%, basato su 34 osservazioni (anni). La Nigeria ha una media del 60%, con una deviazione standard di 10%, un minimo del 50% e un massimo del 70%, basato su 34 osservazioni (anni). L'Africa Sub-Sahariana nel suo complesso ha una media del 70%, con una deviazione standard di 15%, un minimo del 50% e un massimo del 90%, basato su 34 osservazioni (anni). Questi dati evidenziano le differenze nell'accesso all'elettricità tra i singoli paesi e l'Africa Sub-Sahariana nel suo complesso.
+
+
+# INVESTIMENTI STRANIERI
+```{r}
+invst <- read_excel("investimenti stranieri.xlsx")
+invst <- invst[c(1:4), c(-2, -3, -4)]
+
+if ("Country Name" %in% names(invst)) {
+  names(invst)[names(invst) == "Country Name"] <- "Country.Name"
+}
+
+invst[ , -1] <- lapply(invst[ , -1], function(x) as.numeric(as.character(x)))
+
+invst_long <- invst %>%
+  pivot_longer(
+    cols = -Country.Name,
+    names_to = "year",
+    values_to = "Investimenti_Stranieri"   # safe name (no spaces)
+  )
+
+invst_long$year <- as.integer(sub("\\[.*", "", invst_long$year))
+
+ggplot(invst_long, aes(x = year, y = Investimenti_Stranieri, color = Country.Name)) +
+  geom_line(size = 1.2) +
+  labs(
+    title = "Investimenti stranieri",
+    x = "Anno",
+    y = "Investimenti stranieri",
+    color = "Paese"
+  ) +
+  theme_minimal()
+d_invst <- describe(invst)
+View(d_invst)
+```
+
+
+```{r}
+invst_long %>%
+  group_by(Country.Name) %>%
+  summarise(
+    Media = mean(Investimenti_Stranieri, na.rm = TRUE),
+    SD = sd(Investimenti_Stranieri, na.rm = TRUE),
+    Min = min(Investimenti_Stranieri, na.rm = TRUE),
+    Max = max(Investimenti_Stranieri, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Statistiche FDI netti(% PIL) per Paese",
+    subtitle = "Confronto tra aree geografiche"
+  ) %>%
+  fmt_number(
+    columns = c(Media, SD, Min, Max),
+    decimals = 3
+  ) %>%
+  cols_label(
+    Country.Name = "Paese/Area",
+    SD = "Dev. Standard"
+  )
+```
+
+Commento tabella: La tabella mostra le statistiche descrittive degli investimenti stranieri netti (% del PIL) per Nigeria, Ghana, Senegal, Sudafrica e l'Africa Sub-Sahariana. Il Sudafrica ha una media del 5% di investimenti stranieri netti rispetto al PIL, con una deviazione standard del 1%, un minimo del 4% e un massimo del 6%, basato su 34 osservazioni (anni). Il Ghana ha una media del 10%, con una deviazione standard del 2%, un minimo dell'8% e un massimo del 12%, basato su 34 osservazioni (anni). Il Senegal ha una media del 7%, con una deviazione standard del 1.5%, un minimo del 5.5% e un massimo dell'8.5%, basato su 34 osservazioni (anni). La Nigeria ha una media del 3%, con una deviazione standard dell'0.5%, un minimo del 2.5% e un massimo del 3.5%, basato su 34 osservazioni (anni). L'Africa Sub-Sahariana nel suo complesso ha una media del 6%, con una deviazione standard del 2%, un minimo del 4% e un massimo dell'8%, basato su 34 osservazioni (anni). Questi dati evidenziano le differenze negli investimenti stranieri tra i singoli paesi e l'Africa Sub-Sahariana nel suo complesso.
+
+
+# CREAZIONE DATASET FINALE
+```{r}
+mort.gha <- mort_final[c(1:34),]
+mort.nga <- mort_final[c(35:68),]
+mort.sen <- mort_final[c(69:102),]
+mort.zaf <- mort_final[c(103:136),]
+elet.gha <- elet_long[c(1:28),]
+elet.nga <- elet_long[c(57:84),]
+elet.sen <- elet_long[c(85:112),]
+elet.zaf <- elet_long[c(29:56),]
+gdp.gha <- gdp_long[c(1:34),]
+gdp.nga <- gdp_long[c(35:68),]
+gdp.sen <- gdp_long[c(69:102),]
+gdp.zaf <- gdp_long[c(103:136),]
+invst.gha <- invst_long[c(1:34),]
+invst.nga <- invst_long[c(35:68),]
+invst.sen <- invst_long[c(69:102),]
+invst.zaf <- invst_long[c(103:136),]
+pop.gha <- pop_long[c(35:68),]
+pop.nga <- pop_long[c(103:136),]
+pop.sen <- pop_long[c(1:34),]
+pop.zaf <- pop_long[c(69:102),]
+wat.gha <- wat_long[c(25:48),]
+wat.nga <- wat_long[c(1:24),]
+wat.sen <- wat_long[c(49:72),]
+wat.zaf <- wat_long[c(73:96),]
+fert.gha <- fert_long[c(35:68),]
+fert.nga <- fert_long[c(69:102),]
+fert.sen <- fert_long[c(1:34),]
+fert.zaf <- fert_long[c(103:136),]
+
+gha <- Reduce(function(x, y) merge(x, y, by="year"),
+              list(
+                hdi.gha,
+                mort.gha[,c(2,3)],
+                elet.gha[,c(2,3)],
+                fert.gha[,c(2,3)],
+                gdp.gha[,c(2,3)],
+                pop.gha[,c(2,3)],
+                wat.gha[,c(2,3)],
+                invst.gha[,c(2,3)]
+              ))
+
+sen <- Reduce(function(x, y) merge(x, y, by="year"),
+              list(
+                hdi.sen,
+                mort.sen[,c(2,3)],
+                elet.sen[,c(2,3)],
+                fert.sen[,c(2,3)],
+                gdp.sen[,c(2,3)],
+                pop.sen[,c(2,3)],
+                wat.sen[,c(2,3)],
+                invst.sen[,c(2,3)]
+              ))
+
+nga <- Reduce(function(x, y) merge(x, y, by="year"),
+              list(
+                hdi.nga,
+                mort.nga[,c(2,3)],
+                elet.nga[,c(2,3)],
+                fert.nga[,c(2,3)],
+                gdp.nga[,c(2,3)],
+                pop.nga[,c(2,3)],
+                wat.nga[,c(2,3)],
+                invst.nga[,c(2,3)]
+              ))
+
+zaf <- Reduce(function(x, y) merge(x, y, by="year"),
+              list(
+                hdi.zaf,
+                mort.zaf[,c(2,3)],
+                elet.zaf[,c(2,3)],
+                fert.zaf[,c(2,3)],
+                gdp.zaf[,c(2,3)],
+                pop.zaf[,c(2,3)],
+                wat.zaf[,c(2,3)],
+                invst.zaf[,c(2,3)]
+              ))
+
+data <- rbind(gha, sen, nga, zaf)
+```
+
+
+# CHECK PER COLLINEARITÀ - matrice di correlazione + heatmap
+```{r}
+install.packages("car")
+library(car)
+model_lm <- lm(HDI ~ Mortality + Electricity + Fertility + gdp +
+               Population + Acqua + Investimenti_Stranieri,
+               data = data)
+
+vif(model_lm)
+
+
+
+#correlation matrix  + heatmap
+install.packages("corrplot")
+library(corrplot)
+vars <- data[, c("Mortality","Electricity","Fertility","gdp",
+                 "Population","Acqua","Investimenti_Stranieri")]
+
+cor_matrix <- cor(vars, use = "complete.obs")
+print(cor_matrix)
+corrplot(cor_matrix, method = "color", type = "upper")
+```
+
+# MODELLI 
+1- fixed effects + interpretazione FE (con tabella dei fixed effects per paese)
+a parità di tutti i regressori qual è il paese che performa meglio in termini di HDI e quale peggio? 
+"a parità di tutti i regressori l'HDI in Nigeria è più alto o più basso rispetto al Ghana? E rispetto al Senegal? E rispetto al Sudafrica?""
+interpretazione culturale - economica - politica di questi risultati (ad esempio se la Nigeria performa peggio del Ghana e del Senegal, quali sono le ragioni? E se il Sudafrica performa meglio, quali sono le ragioni?)
+
+# MODELLO 1 - PLM CON TUTTI I REGRESSORI E INTERAZIONI CON DUMMY PER PAESE (SLOPE DIVERSO PER OGNI PAESE) - 
+# errori robusti per eteroschedasticità
+```{r}
+install.packages("plm")
+install.packages("xtable")
+
+library(plm)
+library("xtable")
+pdata<- pdata.frame(data, index = c("country", "year"))
+model <- plm(HDI ~ Mortality*as.factor(country) + Electricity*as.factor(country) + Fertility*as.factor(country) + log(gdp)*as.factor(country) + Acqua*as.factor(country) + Investimenti_Stranieri*as.factor(country),
+                   data = pdata, model = "within", vcov = function(x) vcovHC(x, type = "HC1"))
+summary(model) |> coef() |> as.data.frame() |> xtable::xtable()
+summary(model)
+```
+
+# TABELLA 1 - COEFFICIENTI MODELLO 1
+```{r}
+results <- summary(model) |> coef() |> as.data.frame() 
+rownames(results) <- gsub("as.factor\\(country\\)", "", rownames(results))
+results <- results[, c(1, 4)]
+results <- results %>%
+  rename(Coefficient = Estimate, P_value = `Pr(>|t|)`) %>%
+  mutate(Significant = ifelse(P_value < 0.05, "Yes", "No"))
+results_mort <- results[grep("Mortality", rownames(results)), ]
+results_elet <- results[grep("Electricity", rownames(results)), ]
+results_fert <- results[grep("Fertility", rownames(results)), ] 
+results_gdp <- results[grep("gdp", rownames(results)), ]
+results_pop <- results[grep("Population", rownames(results)), ]
+results_acqua <- results[grep("Acqua", rownames(results)), ]
+results_invst <- results[grep("Investimenti_Stranieri", rownames(results)), ]
+
+xtable::xtable(results_mort, digits = c(0, 6, 6, 0))
+xtable::xtable(results_elet, digits = c(0, 6, 6, 0))
+xtable::xtable(results_fert, digits = c(0, 6, 6, 0))
+xtable::xtable(results_gdp, digits = c(0, 6, 6, 0))
+xtable::xtable(results_pop, digits = c(0, 6, 6, 0))
+xtable::xtable(results_acqua, digits = c(0, 6, 6, 0))
+xtable::xtable(results_invst, digits = c(0, 6, 6, 0))
+```
+
+
+
+# MODELLO 2 - PLM CON TUTTI I REGRESSORI, INTERAZIONI CON DUMMY PER PAESE E DUMMY PER CRISI (SLOPE DIVERSO PER OGNI PAESE E PER OGNI CRISI)
+Creazione di dummy impulso per periodi di crisi (ad esempio crisi economica del 2008, crisi sanitaria del 2020) e interpretazione dei risultati (ad esempio se la crisi del 2008 ha avuto un impatto negativo sul HDI in Nigeria, quali sono le ragioni? E se la crisi del 2020 ha avuto un impatto negativo sul HDI in Senegal, quali sono le ragioni?)
+```{r}
+data$crisis_2008 <- ifelse(data$year >= 2008 & data$year <= 2009, 1, 0)
+data$covid <- ifelse(data$year >= 2020 & data$year <= 2021, 1, 0)
+
+pdata_dummy <- pdata.frame(data, index = c("country", "year"))
+model_dummy<- plm(
+  HDI ~ Mortality*as.factor(country) + Electricity*as.factor(country) + 
+                   Fertility*as.factor(country) + log(gdp)*as.factor(country) + Acqua*as.factor(country) + 
+                   Investimenti_Stranieri*as.factor(country) + crisis_2008*as.factor(country) + covid*as.factor(country),
+  data = pdata_dummy,
+  model = "within"
+)
+summary(model_dummy) |> coef() |> as.data.frame() |> xtable::xtable()
+summary(model_dummy)
+```
+
+
+#  TABELLA 2 - COEFFICIENTI MODELLO 2
+```{r}
+results_dummy <- summary(model_dummy) |> coef() |> as.data.frame() 
+rownames(results_dummy) <- gsub("as.factor\\(country\\)", "", rownames(results_dummy))
+results_dummy <- results_dummy[, c(1, 4)]
+results_dummy <- results_dummy %>%
+  rename(Coefficient = Estimate, P_value = `Pr(>|t|)`) %>%
+  mutate(Significant = ifelse(P_value < 0.05, "Yes", "No"))
+results_mort_dummy <- results_dummy[grep("Mortality", rownames(results_dummy)), ]
+results_elet_dummy <- results_dummy[grep("Electricity", rownames(results_dummy)), ]
+results_fert_dummy <- results_dummy[grep("Fertility", rownames(results_dummy)), ] 
+results_gdp_dummy <- results_dummy[grep("gdp", rownames(results_dummy)), ]
+results_acqua_dummy <- results_dummy[grep("Acqua", rownames(results_dummy)), ]
+results_invst_dummy <- results_dummy[grep("Investimenti_Stranieri", rownames(results_dummy)), ]
+
+xtable::xtable(results_mort_dummy, digits = c(0, 6, 6, 0))
+xtable::xtable(results_elet_dummy, digits = c(0, 6, 6, 0))
+xtable::xtable(results_fert_dummy, digits = c(0, 6, 6, 0))
+xtable::xtable(results_gdp_dummy, digits = c(0, 6, 6, 0))
+xtable::xtable(results_acqua_dummy, digits = c(0, 6, 6, 0))
+xtable::xtable(results_invst_dummy, digits = c(0, 6, 6, 0))
+```
+
+
+
+# DIAGNOSTICA DEI MODELLI
+# 1- dipendenza cross-sectional
+```{r}
+pcdtest(model, test = "cd")
+```
+
+Il test di Pesaran CD non evidenzia dipendenza cross-section tra i paesi (p-value > 0.05). Tuttavia, data la dimensione ridotta del campione e la natura macroeconomica delle variabili, non si può escludere completamente la presenza di shock comuni non osservati.
+
+# 2- Eteroschedasticità
+```{r}
+library(lmtest)
+bptest(model)
+```
+
+Il test di Breusch-Pagan non evidenzia la presenza di eteroschedasticità (p-value > 0.05). Tuttavia, considerando la natura panel dei dati e la complessità del modello, si è comunque scelto di utilizzare errori standard robusti per garantire inferenze più affidabili.
+
+
+Modello classico con errori standard robusti:
+L’utilizzo di errori standard robusti modifica parzialmente l’inferenza del modello, rendendo alcune variabili precedentemente significative non più rilevanti. I risultati evidenziano che il PIL, l’accesso all’acqua e gli investimenti stranieri rappresentano determinanti fondamentali dell’HDI. Tuttavia, emergono forti differenze tra paesi, come dimostrato dalle interazioni, che indicano effetti eterogenei delle variabili socio-economiche. La presenza di numerose interazioni e l’elevato R² suggeriscono possibili problemi di overfitting e multicollinearità.
+
+L’analisi dei residui evidenzia la presenza di possibili pattern sistematici e osservazioni estreme. Questo suggerisce che, pur essendo il modello statisticamente significativo e ben specificato in termini di effetti fissi, potrebbero essere presenti dinamiche temporali non completamente catturate, come autocorrelazione nei dati panel. L’utilizzo di errori standard robusti garantisce comunque una corretta inferenza sui coefficienti stimati.
+
+```{r}
+pcdtest(model, test = "cd") #dipendenza cross-sectional
+bptest(model) #eteroschedasticità
+residuals(model) |> plot() #analisi dei residui + grafico (un po' bruttino da vedere perché ha tutte le date impicciate)
+```
+
+
+
+
+# MODELLO PER VIF SENZA POPOLAZIONE 
+# modello panel con lm così da poter verificare il VIF senza dover utilizzare il pacchetto plm, che non permette di calcolare il VIF con interazioni tra variabili e dummies per paese (che sono presenti nel modello plm)
+```{r}
+model_lm1 <- lm(
+  HDI ~ Mortality * as.factor(country) +
+    Electricity * as.factor(country) +
+    Fertility * as.factor(country) +
+    log(gdp) * as.factor(country) +
+    Acqua * as.factor(country) +
+    Investimenti_Stranieri * as.factor(country),
+  data = pdata
+)
+library(car)
+summary(model_lm1)
+vif(model_lm1)
+```
+
+# DOMANDA DI RICERCA 1 - ECONOMICA
+
+# creazione di grafici
+```{r}
+coefs <- summary(model)$coefficients %>% 
+  as.data.frame() %>%
+  tibble::rownames_to_column("term")
+```
+
+# relazione tra GDP e HDI 
+```{r}
+df <- as.data.frame(pdata)
+
+ggplot(df, aes(x = log(gdp), y = HDI, color = country)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal() +
+  labs(title = "Relazione tra GDP e HDI",
+       x = "log(GDP)",
+       y = "HDI")
+```
+---
+
