@@ -794,7 +794,6 @@ xtable::xtable(results_invst_dummy, digits = c(0, 6, 6, 0))
 
 
 # DIAGNOSTICA DEI MODELLI
-
 # 1- dipendenza cross-sectional
 ```{r}
 pcdtest(model, test = "cd")
