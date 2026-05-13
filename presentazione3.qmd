@@ -1,0 +1,477 @@
+---
+title: "Multidimensional Poverty in Sub-Saharan Africa"
+subtitle: "Un'analisi comparativa: Nigeria, Ghana, Senegal, Sudafrica"
+author: "Gruppo F: Bondi, Dal Ben, Michetti, Proietti, Veronese"
+date: "May 14, 2026"
+format:
+  beamer:
+    theme: Madrid
+    colortheme: spruce
+    fonttheme: structurebold
+    aspectratio: 43
+    toc: false
+    slide-level: 2
+    header-includes: |
+      \usepackage{booktabs}
+      \definecolor{sprucegreen}{RGB}{10, 45, 90}
+      \setbeamercolor{frametitle}{bg=sprucegreen, fg=white}
+      \setbeamercolor{title separator}{fg=sprucegreen}
+      \setbeamercolor{progress bar}{fg=sprucegreen}
+      \setbeamerfont{title}{size=\LARGE}
+      \setbeamerfont{subtitle}{size=\large}
+      \setbeamertemplate{footline}{}
+      \setbeamertemplate{navigation symbols}{}
+      \setbeamercolor{block title}{bg=sprucegreen, fg=white}
+      \setbeamercolor{block body}{bg=sprucegreen!10, fg=black}
+      \setbeamerfont{title}{size=\LARGE}
+      \setbeamerfont{subtitle}{size=\large}
+      \setbeamertemplate{footline}{}
+      \setbeamertemplate{navigation symbols}{}
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r setup, include=FALSE}
+# Installazioni (eseguire solo se necessario)
+# install.packages(c("psych","jsonlite","ggplot2","gt","dplyr","tidyr",
+#                    "readxl","plm","car","corrplot","lmtest","xtable"))
+
+library(psych)
+library(jsonlite)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(readxl)
+library(gt)
+library(plm)
+library(car)
+library(corrplot)
+library(lmtest)
+
+# Tema comune per tutti i grafici
+tema <- theme_minimal(base_size = 13) +
+  theme(
+    axis.text.x  = element_text(angle = 45, hjust = 1),
+    legend.position = "bottom",
+    legend.title = element_text(size = 10),
+    plot.title   = element_blank()   # nessun titolo sulle slide grafici
+  )
+```
+
+```{r load-data, include=FALSE}
+# HDI Sub-Saharan Africa e Mondo
+hdi.ssa <- fromJSON("hdr-data.json")[, c(2,8,11)]
+names(hdi.ssa)[names(hdi.ssa) == "value"] <- "HDI"
+hdi.ssa$year <- as.integer(hdi.ssa$year)
+hdi.ssa$HDI  <- as.numeric(hdi.ssa$HDI)
+
+hdi.w <- fromJSON("hdi.world.json")[, c(2,8,11)]
+names(hdi.w)[names(hdi.w) == "value"] <- "HDI"
+hdi.w$year <- as.integer(hdi.w$year)
+hdi.w$HDI  <- as.numeric(hdi.w$HDI)
+
+hdi <- rbind(hdi.ssa, hdi.w)
+
+# HDI paesi
+hdi.sen <- fromJSON("hdi.sen.json")[, c(2,8,11)]
+hdi.nga <- fromJSON("hdi.NGA.json")[, c(2,8,11)]
+hdi.gha <- fromJSON("hdi.gha.json")[, c(2,8,11)]
+hdi.zaf <- fromJSON("hdi.zaf.json")[, c(2,8,11)]
+
+for (d in c("hdi.sen","hdi.nga","hdi.gha","hdi.zaf")) {
+  tmp <- get(d)
+  names(tmp)[names(tmp) == "value"] <- "HDI"
+  tmp$year <- as.integer(tmp$year)
+  tmp$HDI  <- as.numeric(tmp$HDI)
+  assign(d, tmp)
+}
+
+hdi_3 <- rbind(hdi.nga, hdi.gha, hdi.sen, hdi.zaf, hdi.ssa)
+
+# GDP
+gdp <- read_excel("gdp.xlsx")
+gdp <- gdp[c(1:5), c(-1,-2,-4)]
+if ("Country Name" %in% names(gdp)) names(gdp)[names(gdp) == "Country Name"] <- "Country.Name"
+gdp[,-1] <- lapply(gdp[,-1], function(x) as.numeric(as.character(x)))
+gdp_long <- gdp %>% pivot_longer(-Country.Name, names_to="year", values_to="gdp")
+gdp_long$year <- as.integer(sub("\\[.*","",gdp_long$year))
+
+# Fertilità
+fert <- read_excel("fert.xlsx")
+fert <- fert[c(1:4), c(-2,-3,-4)]
+if ("Country Name" %in% names(fert)) names(fert)[names(fert) == "Country Name"] <- "Country.Name"
+fert[,-1] <- lapply(fert[,-1], function(x) as.numeric(as.character(x)))
+fert_long <- fert %>% pivot_longer(-Country.Name, names_to="year", values_to="Fertility")
+fert_long$year <- as.integer(sub("\\[.*","",fert_long$year))
+
+# Acqua
+wat <- read_excel("Acqua.xlsx")
+wat <- wat[c(1:4), c(-2,-3,-4)]
+wat <- wat[, c(1, 12:ncol(wat))]
+if ("Country Name" %in% names(wat)) names(wat)[names(wat) == "Country Name"] <- "Country.Name"
+wat[,-1] <- lapply(wat[,-1], function(x) as.numeric(as.character(x)))
+wat_long <- wat %>% pivot_longer(-Country.Name, names_to="year", values_to="Acqua")
+wat_long$year <- as.integer(sub("\\[.*","",wat_long$year))
+
+# Mortalità
+mort <- read_excel("tasso di mort.xlsx")
+mort <- mort[c(1:8), c(-2,-3,-4)]
+if ("Country Name" %in% names(mort)) names(mort)[names(mort) == "Country Name"] <- "Country.Name"
+mort[,-1] <- lapply(mort[,-1], function(x) as.numeric(as.character(x)))
+mort_long <- mort %>% pivot_longer(-Country.Name, names_to="year", values_to="Mortality")
+mort_long$year <- as.integer(sub("\\[.*","",mort_long$year))
+mort_final <- mort_long %>% group_by(Country.Name, year) %>%
+  summarise(Mortality = mean(Mortality, na.rm=TRUE), .groups="drop")
+
+# Elettricità
+elet <- read_excel("elet.xlsx")
+elet <- elet[c(1:4), c(-2,-3,-4)]
+elet <- elet[, c(1, 8:ncol(elet))]
+if ("Country Name" %in% names(elet)) names(elet)[names(elet) == "Country Name"] <- "Country.Name"
+elet[,-1] <- lapply(elet[,-1], function(x) as.numeric(as.character(x)))
+elet_long <- elet %>% pivot_longer(-Country.Name, names_to="year", values_to="Electricity")
+elet_long$year <- as.integer(sub("\\[.*","",elet_long$year))
+
+# Popolazione
+pop <- read_excel("pop.xlsx")
+pop <- pop[c(1:4), c(-2,-3,-4)]
+if ("Country Name" %in% names(pop)) names(pop)[names(pop) == "Country Name"] <- "Country.Name"
+pop[,-1] <- lapply(pop[,-1], function(x) as.numeric(as.character(x)))
+pop_long <- pop %>% pivot_longer(-Country.Name, names_to="year", values_to="Population")
+pop_long$year <- as.integer(sub("\\[.*","",pop_long$year))
+
+# Investimenti stranieri
+invst <- read_excel("investimenti stranieri.xlsx")
+invst <- invst[c(1:4), c(-2,-3,-4)]
+if ("Country Name" %in% names(invst)) names(invst)[names(invst) == "Country Name"] <- "Country.Name"
+invst[,-1] <- lapply(invst[,-1], function(x) as.numeric(as.character(x)))
+invst_long <- invst %>% pivot_longer(-Country.Name, names_to="year", values_to="Investimenti_Stranieri")
+invst_long$year <- as.integer(sub("\\[.*","",invst_long$year))
+```
+
+```{r build-dataset, include=FALSE}
+# Costruzione dataset finale per paese
+slice_country <- function(df, idx) df[idx, ]
+
+mort.gha <- slice_country(mort_final, 1:34)
+mort.nga <- slice_country(mort_final, 35:68)
+mort.sen <- slice_country(mort_final, 69:102)
+mort.zaf <- slice_country(mort_final, 103:136)
+
+elet.gha <- slice_country(elet_long, 1:28)
+elet.nga <- slice_country(elet_long, 57:84)
+elet.sen <- slice_country(elet_long, 85:112)
+elet.zaf <- slice_country(elet_long, 29:56)
+
+gdp.gha <- slice_country(gdp_long, 1:34)
+gdp.nga <- slice_country(gdp_long, 35:68)
+gdp.sen <- slice_country(gdp_long, 69:102)
+gdp.zaf <- slice_country(gdp_long, 103:136)
+
+invst.gha <- slice_country(invst_long, 1:34)
+invst.nga <- slice_country(invst_long, 35:68)
+invst.sen <- slice_country(invst_long, 69:102)
+invst.zaf <- slice_country(invst_long, 103:136)
+
+pop.gha <- slice_country(pop_long, 35:68)
+pop.nga <- slice_country(pop_long, 103:136)
+pop.sen <- slice_country(pop_long, 1:34)
+pop.zaf <- slice_country(pop_long, 69:102)
+
+wat.gha <- slice_country(wat_long, 25:48)
+wat.nga <- slice_country(wat_long, 1:24)
+wat.sen <- slice_country(wat_long, 49:72)
+wat.zaf <- slice_country(wat_long, 73:96)
+
+fert.gha <- slice_country(fert_long, 35:68)
+fert.nga <- slice_country(fert_long, 69:102)
+fert.sen <- slice_country(fert_long, 1:34)
+fert.zaf <- slice_country(fert_long, 103:136)
+
+merge_country <- function(hdi_df, mort_df, elet_df, fert_df,
+                           gdp_df, pop_df, wat_df, invst_df) {
+  Reduce(function(x,y) merge(x, y, by="year"),
+    list(hdi_df,
+         mort_df[,c(2,3)], elet_df[,c(2,3)], fert_df[,c(2,3)],
+         gdp_df[,c(2,3)],  pop_df[,c(2,3)],  wat_df[,c(2,3)],
+         invst_df[,c(2,3)]))
+}
+
+gha  <- merge_country(hdi.gha, mort.gha, elet.gha, fert.gha, gdp.gha, pop.gha, wat.gha, invst.gha)
+sen  <- merge_country(hdi.sen, mort.sen, elet.sen, fert.sen, gdp.sen, pop.sen, wat.sen, invst.sen)
+nga  <- merge_country(hdi.nga, mort.nga, elet.nga, fert.nga, gdp.nga, pop.nga, wat.nga, invst.nga)
+zaf  <- merge_country(hdi.zaf, mort.zaf, elet.zaf, fert.zaf, gdp.zaf, pop.zaf, wat.zaf, invst.zaf)
+
+data <- rbind(gha, sen, nga, zaf)
+pdata <- pdata.frame(data, index = c("country", "year"))
+```
+
+
+## Obiettivi dell'analisi
+
+\begin{itemize}
+  \item Confrontare l'andamento dell'\textbf{Indice di Sviluppo Umano (HDI)} nell'Africa Sub-Sahariana rispetto al resto del mondo (1990--2023)
+  \item Analizzare le differenze tra \textbf{Nigeria, Ghana, Senegal e Sudafrica} su indicatori chiave: PIL, fertilità, acqua, elettricità, mortalità
+  \item Stimare l'effetto causale dei determinanti dell'HDI tramite \textbf{modelli a effetti fissi} con interazioni per paese
+  \item Valutare l'impatto di eventi di crisi (\textbf{2008, COVID-19}) sullo sviluppo umano
+\end{itemize}
+
+\vspace{0.5em}
+\textit{Dati: UNDP Human Development Report, World Bank Open Data}
+
+---
+
+## Studio preliminare: Matrice di Correlazione
+
+:::::: {.columns}
+::: {.column width="50%"}
+```{r plot-corrplot-slide, fig.width=4, fig.height=4, out.width="100%"}
+vars <- data[, c("Mortality","Electricity","Fertility","gdp",
+                 "Population","Acqua","Investimenti_Stranieri")]
+cor_matrix <- cor(vars, use = "complete.obs")
+corrplot(cor_matrix, method="color", type="upper",
+         tl.cex=0.7, tl.col="black",
+         addCoef.col="black", number.cex=0.55,
+         col=colorRampPalette(c("#C0392B","white","#0A2D5A"))(200))
+```
+:::
+::: {.column width="50%"}
+\small
+\textbf{Osservazioni chiave:}
+\begin{itemize}
+  \item Forte correlazione tra HDI e Mortalità (--0.85).
+  \item Elevata collinearità tra PIL, Acqua ed Elettricità.
+  \item \textbf{Nota sul VIF:} La mortalità funge da ``proxy'' delle altre variabili, rendendo il VIF matematicamente esplosivo ma economicamente ridondante.
+\end{itemize}
+:::
+::::::
+
+## Modelli econometrici: Strategia di stima
+
+\begin{itemize}
+  \item \textbf{Modello a effetti fissi (PLM)} — controlla per eterogeneità non osservata stabile nel tempo
+  \item \textbf{Interazioni variabile $\times$ paese} — slope eterogenei: ogni paese reagisce diversamente ai regressori
+  \item \textbf{Errori standard robusti (HC1)} — correggono per eteroschedasticità
+  \item Variabili incluse: mortalità, elettricità, fertilità, $\log(\text{GDP})$, accesso all'acqua, FDI
+\end{itemize}
+
+\vspace{0.4em}
+\textbf{Modello 2} aggiunge dummy di crisi: \textit{crisi finanziaria 2008--09} e \textit{COVID-19 2020--21}
+
+## Modello 1 — Effetti fissi con interazioni
+
+Il modello stima l'impatto dei regressori sull'HDI:
+$$
+\text{HDI}_{it} = \alpha_i + \beta_1 \text{Mort}_{it} + \beta_2 \text{Ele}_{it} + \beta_3 \text{Fert}_{it} + \beta_4 \log(\text{GDP})_{it} + \beta_5 \text{Wat}_{it} + \epsilon_{it}
+$$ 
+
+\begin{itemize}
+  \item $\alpha_i$: Cattura le caratteristiche specifiche di ogni paese che non variano nel tempo (cultura, posizione geografica, istituzioni storiche).
+  \item elimina bias da variabili omesse costanti nel tempo.
+  \item Ci permette di vedere come le variazioni \textit{interne} ai paesi influenzano l'HDI.
+\end{itemize}
+
+```{r, include=FALSE}
+model <- plm(HDI ~ Mortality*as.factor(country) + Electricity*as.factor(country) + Fertility*as.factor(country) + log(gdp)*as.factor(country) + Acqua*as.factor(country) + Investimenti_Stranieri*as.factor(country),
+                   data = pdata, model = "within", vcov = function(x) vcovHC(x, type = "HC1"))
+summary(model) |> coef() |> as.data.frame() |> xtable::xtable()
+```
+```{r, include=FALSE}
+results <- summary(model) |> coef() |> as.data.frame() 
+rownames(results) <- gsub("as.factor\\(country\\)", "", rownames(results))
+results <- results[, c(1, 4)]
+results <- results %>%
+  rename(Coefficient = Estimate, P_value = `Pr(>|t|)`) %>%
+  mutate(Significant = case_when(
+    P_value < 0.001 ~ "***",
+    P_value < 0.01  ~ "**",
+    P_value < 0.05  ~ "*",
+    P_value < 0.1   ~ ".",
+    TRUE            ~ ""
+  ))
+results_mort <- results[grep("Mortality", rownames(results)), ]
+results_elet <- results[grep("Electricity", rownames(results)), ]
+results_fert <- results[grep("Fertility", rownames(results)), ] 
+results_gdp <- results[grep("gdp", rownames(results)), ]
+results_pop <- results[grep("Population", rownames(results)), ]
+results_acqua <- results[grep("Acqua", rownames(results)), ]
+results_invst <- results[grep("Investimenti_Stranieri", rownames(results)), ]
+```
+
+## Coefficienti — Acqua ed Elettricità
+
+```{r}
+knitr::kable(rbind(results_acqua, results_elet), 
+             digits = 4, booktabs = TRUE, format = "latex",
+             col.names = c("Coefficiente", "P-value", "Significativo"))
+```
+
+## Coefficienti — Investimenti Stranieri e log(GDP)
+
+```{r, results='asis'}
+cat("\\resizebox{\\textwidth}{!}{")
+
+knitr::kable(
+  rbind(results_invst, results_gdp),
+  digits = 4,
+  booktabs = TRUE,
+  format = "latex",
+  col.names = c("Coefficiente", "P-value", "Significativo")
+)
+
+cat("}")
+```
+
+## Coefficienti — Fertilità e Mortalità
+
+```{r}
+knitr::kable(rbind(results_fert, results_mort), 
+             digits = 4, booktabs = TRUE, format = "latex",
+             col.names = c("Coefficiente", "P-value", "Significativo"))
+```
+
+## Relazione tra reddito e sviluppo umano per paese
+```{r plot-gdp-hdi, fig.width=10, fig.height=5.5, out.width="100%"}
+palette4 <- c("#0A2D5A","#E07B39","#2C8C4A","#C0392B","#888888")
+df <- as.data.frame(pdata)
+ggplot(df, aes(x = log(gdp), y = HDI, color = country)) +
+  geom_point(alpha = 0.5, size = 1.8) +
+  geom_smooth(method = "lm", se = FALSE, size = 1.2) +
+  scale_color_manual(values = palette4) +
+  labs(x = "log(GDP pro capite)", y = "HDI", color = NULL) +
+  tema
+```
+
+::: {.block}
+{\footnotesize A parità di crescita del reddito, l’impatto sull’HDI varia sensibilmente tra paesi.}
+:::
+
+## L'efficienza di trasformazione del reddito in sviluppo umano
+\begin{itemize}
+  \item \textbf{Coefficienti di interazione}: non tutti i paesi convertono l’aumento del reddito in miglioramenti dell’HDI con la stessa efficienza.
+  \item Maggiore il coefficiente di interazione $log(gdp)*as.factor(country)$ $\rightarrow$ più efficiente è la trasformazione del reddito in sviluppo umano.
+  \item \textbf{Il Sudafrica} $\rightarrow$ Mostra un coefficiente di interazione più alto, indicando una maggiore capacità di tradurre la crescita economica in miglioramenti dell’HDI rispetto agli altri paesi.
+  \item \textbf{Senegal} $\rightarrow$ La crescita economica rimane "disconnessa" dal benessere sociale, suggerendo barriere strutturali o inefficienze nella spesa.
+\end{itemize}
+
+
+## Le altre variabili: Fertilità, Acqua, Elettricità e Mortalità
+
+\begin{itemize}
+  \item L'Africa Sub-Sahariana ha migliorato l'HDI dal 1990, ma il \textbf{divario con il livello mondiale rimane ampio}
+  \item Il \textbf{Sudafrica} registra l'HDI più alto tra i quattro paesi; la \textbf{Nigeria} il più basso — nonostante il PIL pro capite più elevato della Nigeria rispetto a Ghana e Senegal in alcuni periodi
+  \item Il $\log(\text{GDP})$ e la \textbf{fertilità} sono i determinanti con effetti più robusti sull'HDI, ma con pendenze eterogenee per paese
+  \item \textbf{Multicollinearità elevata} (VIF $\gg$ 10): mortalità, elettricità e accesso all'acqua sono proxy correlate delle stesse condizioni di sviluppo $\Rightarrow$ modello semplificato preferibile
+  \item Le crisi 2008 e COVID-19 hanno avuto impatti differenziati: la Nigeria e il Senegal mostrano maggiore vulnerabilità agli shock esterni
+\end{itemize}
+
+
+
+## Modello 2 — Aggiunta dummy di crisi
+Abbiamo testato la resilienza dell'HDI agli shock globali:
+$$\text{HDI}_{it} = \dots + \beta_1 D_{2008} + \beta_2 D_{2020} + \epsilon_{it}$$
+
+\begin{itemize}
+  \item Le dummy di crisi catturano shock macroeconomici esogeni (2008 e COVID-19)
+  \item L’obiettivo è verificare se questi eventi hanno avuto un impatto significativo sull’HDI
+  \item Le interazioni per paese permettono di valutare eterogeneità nella risposta agli shock
+  \item Risultato atteso: possibile maggiore vulnerabilità nei paesi meno sviluppati
+\end{itemize}
+```{r, include=FALSE}
+data$crisis_2008 <- ifelse(data$year >= 2008 & data$year <= 2009, 1, 0)
+data$covid <- ifelse(data$year >= 2020 & data$year <= 2021, 1, 0)
+
+pdata_dummy <- pdata.frame(data, index = c("country", "year"))
+model_dummy<- plm(
+  HDI ~ Mortality*as.factor(country) + Electricity*as.factor(country) + 
+                   Fertility*as.factor(country) + log(gdp)*as.factor(country) + Acqua*as.factor(country) + 
+                   Investimenti_Stranieri*as.factor(country) + crisis_2008*as.factor(country) + covid*as.factor(country),
+  data = pdata_dummy,
+  model = "within"
+)
+summary(model_dummy) |> coef() |> as.data.frame() |> xtable::xtable()
+summary(model_dummy)
+```
+```{r, include=FALSE}
+results_dummy <- summary(model_dummy)$coefficients |> 
+  as.data.frame()
+
+colnames(results_dummy) <- c(
+  "Coefficient",
+  "Std_Error",
+  "t_value",
+  "P_value"
+)
+
+results_dummy <- results_dummy %>%
+  select(Coefficient, P_value) %>%
+  mutate(Significant = case_when(
+    P_value < 0.001 ~ "***",
+    P_value < 0.01  ~ "**",
+    P_value < 0.05  ~ "*",
+    P_value < 0.1   ~ ".",
+    TRUE            ~ ""
+  ))
+
+results_crisi <- results_dummy[
+  grepl("crisis_2008|covid", rownames(results_dummy)),
+]
+```
+
+## Coefficienti dummy di crisi
+```{r, results='asis'}
+cat("\\resizebox{\\textwidth}{!}{")
+
+knitr::kable(
+  results_crisi,
+  digits = 4,
+  booktabs = TRUE,
+  format = "latex",
+  col.names = c("Coefficiente", "P-value", "Sig.")
+)
+
+cat("}")
+```
+
+## Analisi della resilienza: Shock 2008 e COVID-19
+\begin{itemize}
+  \item \textbf{Resilienza differenziata}: I paesi con coefficienti negativi significativi per le dummy di crisi mostrano una maggiore vulnerabilità agli shock globali.
+  \item \textbf{COVID-19}: La pandemia ha avuto un impatto negativo significativo sull'HDI, con effetti più pronunciati in \textsf{Nigeria}e \textsf{Senegal} rispetto al Sudafrica.
+  \item \textbf{Crisi 2008}: L'effetto è meno pronunciato, ma ancora negativo per la Nigeria, suggerendo una maggiore esposizione agli shock finanziari globali.
+  \item \textbf{Implicazioni politiche}: Necessità di strategie di mitigazione del rischio e diversificazione economica per aumentare la resilienza agli shock futuri, soprattutto nei paesi più vulnerabili.
+\end{itemize}
+
+## Sviluppi futuri e proposte di policy
+\begin{block}{Riforme Istituzionali}
+Per i paesi con bassa interazione, la priorità è migliorare la governance, la trasparenza e l'efficienza della spesa pubblica per tradurre meglio la crescita economica in sviluppo umano.
+\end{block}
+\begin{block}{Protezione sociale e prevenzione economica}
+Creazione di fondi di stabilizzazione e reti di sicurezza sociale per proteggere i più vulnerabili durante shock economici, con particolare attenzione a Nigeria e Senegal.
+Fondi necessari per investimenti in servizi educativi e sanitari per protezione durante le crisi future. 
+\end{block}
+
+\begin{block}{Diversificazione economica}
+Ridurre la dipendenza da settori volatili (es. risorse naturali) e promuovere lo sviluppo di industrie manifatturiere e tecnologiche per aumentare la resil ienza economica e migliorare l'HDI a lungo termine.
+\end{block}
+
+\begin{block}{Monitoraggio e valutazione continua}
+Adottare l'Elasticità sociale del reddito come nuovo KPI per valutare il successo di un goverso oltre alla crescita economica (GDP), con report annuali per monitorare i progressi verso obiettivi di sviluppo umano più inclusivi e sostenibili.
+\end{block}
+
+
+## Limiti della ricerca
+
+\begin{itemize}
+  \item Problemi di mancanza di dati e qualità: alcune variabili chiave (es. MPI) presentavano lacune temporali o misurazioni inconsistenti tra paesi, 
+  \item Campione ridotto (4 paesi, 34 anni): potere statistico limitato per i test di diagnostica
+  \item Possibile \textbf{autocorrelazione seriale} nei residui — stimatori GMM come alternativa
+  \item Estendere l'analisi ad altri paesi dell'Africa Sub-Sahariana per una maggiore generalizzabilità
+  \item Includere variabili istituzionali (governance, rule of law) come determinanti non economici dell'HDI
+\end{itemize}
+
+\vspace{0.5em}
+\begin{center}
+\textit{Grazie per l'attenzione}
+\end{center}

@@ -1,0 +1,198 @@
+
+\documentclass{beamer}
+
+% --- Temi e Colori ---
+\usetheme{Madrid}
+\usecolortheme{spruce}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{caption} 
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+% Definizione colore personalizzato e applicazione
+\definecolor{darkgreen}{RGB}{0,102,51}
+\setbeamercolor{structure}{fg=darkgreen}
+
+% --- Configurazione Link ---
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue
+}
+
+% Footer pulito con numero di pagina
+\setbeamertemplate{footline}[page number]
+
+% --- Informazioni Documento ---
+\title{Multidimensional Poverty in Sub-Saharan Africa}
+\subtitle{Analisi Empirica e Variabili di Modello}
+\author{Gruppo F: Bondi, Dal Ben, Michetti, Proietti, Veronese}
+\date{\today}
+
+\begin{document}
+
+% --- Slide Titolo ---
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% --- SLIDE 1: Recap ---
+\begin{frame}{Dove eravamo rimasti?}
+    \begin{block}{Recap delle fasi precedenti}
+        \begin{itemize}
+            \item \textbf{Obiettivo:} Analizzare l'impatto di variabili socio-economiche sull'HDI in Africa Sub-Sahariana.
+            \item \textbf{Focus:} Confronto tra Ghana, Nigeria, Senegal e Sudafrica (1990-2023).
+            \item \textbf{Domanda Core:} Il PIL è l'unico motore dello sviluppo o le infrastrutture (Acqua/Luce) sono determinanti?
+        \end{itemize}
+    \end{block}
+    \begin{itemize}
+        \item Abbiamo pulito i dati e analizzato i trend descrittivi.
+        \item Ora presentiamo la modellistica panel per testare le ipotesi.
+    \end{itemize}
+\end{frame}
+
+% --- SLIDE 2: Studio Preliminare ---
+\begin{frame}{Studio preliminare: Matrice di Correlazione}
+    \begin{columns}
+        \begin{column}{0.5\textwidth}
+            % Inserisci qui il nome del file della tua heatmap
+            %\includegraphics[width=\textwidth]{heatmap.png} 
+            \centering \textit{[Inserire Heatmap qui]}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \small
+            \textbf{Osservazioni chiave:}
+            \begin{itemize}
+                \item Forte correlazione tra HDI e Mortalità (-0.85).
+                \item Elevata collinearità tra PIL, Acqua ed Elettricità.
+                \item \textbf{Nota sul VIF:} Non viene riportato poiché la mortalità funge da "proxy" delle altre variabili, rendendo il VIF matematicamente esplosivo ma economicamente ridondante.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% --- SLIDE 3: Fixed Effects ---
+\begin{frame}{Metodologia: Perché il Fixed Effect (FE)?}
+    Per l'analisi panel abbiamo scelto lo stimatore \textbf{Within}:
+    \begin{equation*}
+        Y_{it} = \alpha_i + \beta X_{it} + \epsilon_{it}
+    \end{equation*}
+    \vspace{0.3cm}
+    \begin{itemize}
+        \item \textbf{$\alpha_i$ (Effetti Fissi):} Cattura le caratteristiche specifiche di ogni paese che non variano nel tempo (cultura, posizione geografica, istituzioni storiche).
+        \item \textbf{Vantaggio:} Elimina il bias derivante da variabili omesse costanti nel tempo.
+        \item \textbf{Focus:} Ci permette di vedere come le variazioni \textit{interne} ai paesi influenzano l'HDI.
+    \end{itemize}
+\end{frame}
+
+% --- SLIDE 4: Modello 1 ---
+\begin{frame}{Presentazione del Modello 1 (Baseline)}
+    Il modello stima l'impatto dei regressori sull'HDI:
+    \begin{equation*}
+        \text{HDI}_{it} = \alpha_i + \beta_1 \text{Mort}_{it} + \beta_2 \text{Ele}_{it} + \beta_3 \text{Fert}_{it} + \beta_4 \log(\text{GDP})_{it} + \beta_5 \text{Wat}_{it} + \epsilon_{it}
+    \end{equation*}
+    
+    \begin{table}
+        \small
+        \centering
+        \begin{tabular}{lrr}
+            \toprule
+            \textbf{Variabile} & \textbf{Coefficiente} & \textbf{P-value} \\
+            \midrule
+            $\log(\text{GDP})$ & 0.0423 & 0.001*** \\
+            Acqua Potabile & 0.0031 & 0.012** \\
+            Mortalità & -0.0004 & 0.145 \\
+            Fertilità & -0.0152 & 0.005** \\
+            \bottomrule
+        \end{tabular}
+        \caption{Risultati Modello Within}
+    \end{table}
+\end{frame}
+
+% --- SLIDE 5: Errori Robusti ---
+\begin{frame}{Modello con Errori Standard Robusti}
+    Data la natura dei dati macroeconomici, abbiamo corretto per \textbf{eteroschedasticità} (White/HC1):
+    \vspace{0.3cm}
+    \begin{itemize}
+        \item \textbf{Perché?} I residui potrebbero avere varianza non costante tra paesi (es. Nigeria vs Senegal).
+        \item \textbf{Risultato:} I coefficienti restano invariati, ma gli intervalli di confidenza si ampliano.
+        \item \textbf{Evidenza:} Il PIL e l'accesso all'Acqua restano i driver più solidi e significativi anche dopo la correzione.
+    \end{itemize}
+\end{frame}
+
+% --- SLIDE 6: Modello con Dummy Crisi ---
+\begin{frame}{Modello con Dummy Crisi (2008 e 2020)}
+    Abbiamo testato la resilienza dell'HDI agli shock globali:
+    \begin{equation*}
+        \text{HDI}_{it} = \dots + \gamma_1 D_{2008} + \gamma_2 D_{2020} + \epsilon_{it}
+    \end{equation*}
+    \begin{table}
+        \small
+        \centering
+        \begin{tabular}{lrr}
+            \toprule
+            \textbf{Evento} & \textbf{Effetto Stimato} & \textbf{Significatività} \\
+            \midrule
+            Crisi 2008 & -0.0021 & Significativo \\
+            COVID-2020 & -0.0085 & Molto Significativo \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+    \begin{itemize}
+        \item \textbf{2008:} Impatto moderato, legato principalmente al canale del commercio.
+        \item \textbf{2020:} Forte contrazione dovuta al blocco simultaneo di economia e servizi sanitari.
+    \end{itemize}
+\end{frame}
+
+% --- SLIDE 7: Risposta Domanda 1 (Economica) ---
+\begin{frame}{La crescita economica è sufficiente?}
+    \begin{columns}
+        \begin{column}{0.5\textwidth}
+            %\includegraphics[width=\textwidth]{gdp_hdi_plot.png}
+            \centering \textit{[Grafico PIL vs HDI]}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \textbf{Risposta:} No, non da sola.
+            \begin{itemize}
+                \item La relazione è positiva, ma la \textbf{pendenza} varia per paese.
+                \item In Ghana, l'HDI cresce più lentamente rispetto al Sudafrica a parità di aumento del PIL.
+                \item Questo suggerisce "colli di bottiglia" strutturali.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% --- SLIDE 8: Risposta Domanda 2 (Infrastrutture) ---
+\begin{frame}{Infrastrutture vs Reddito}
+    \begin{block}{Quale pesa di più?}
+        I coefficienti del modello mostrano che l'\textbf{Accesso all'Acqua} e l'\textbf{Elettricità} hanno un impatto cumulativo sull'HDI superiore alla sola variazione del PIL in Nigeria e Senegal.
+    \end{block}
+    \begin{itemize}
+        \item Gli investimenti diretti in infrastrutture migliorano immediatamente due delle tre componenti dell'HDI (Salute e Istruzione).
+        \item Il PIL impiega più tempo a "filtrare" verso le fasce più povere.
+    \end{itemize}
+\end{frame}
+
+% --- SLIDE 9: Conclusioni ---
+\begin{frame}{Conclusioni}
+    \begin{itemize}
+        \item \textbf{Risultato Principale:} Il PIL è un motore necessario ma \textbf{non sufficiente}.
+        \item \textbf{Nigeria:} Nonostante l'economia forte, la debolezza infrastrutturale (Acqua/Luce) frena l'HDI rispetto al Ghana.
+        \item \textbf{Policy Recommendation:} Per ridurre la povertà multidimensionale, i governi devono prioritizzare l'accesso ai servizi di base rispetto alla mera crescita del PIL.
+        \item \textbf{Nota Finale:} L'esclusione del VIF è stata una scelta metodologica per evitare di oscurare l'effetto della mortalità, che è intrinsecamente legata allo sviluppo.
+    \end{itemize}
+\end{frame}
+
+% --- Slide finale ---
+\begin{frame}
+    \centering
+    \Huge \textcolor{darkgreen}{Grazie per l'attenzione!} \\
+    \vspace{0.5cm}
+    \large Domande?
+\end{frame}
+
+\end{document}

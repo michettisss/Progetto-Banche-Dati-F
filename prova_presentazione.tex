@@ -1,0 +1,185 @@
+\documentclass{beamer}
+
+% --- Temi e Colori ---
+\usetheme{Madrid}
+\usecolortheme{spruce}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{caption} 
+
+% Definizione colore personalizzato e applicazione
+\definecolor{darkgreen}{RGB}{0,102,51}
+\setbeamercolor{structure}{fg=darkgreen}
+
+% --- Configurazione Link ---
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue
+}
+
+% Footer pulito con numero di pagina
+\setbeamertemplate{footline}[page number]
+
+% --- Informazioni Documento ---
+\title{Multidimensional Poverty in Sub-Saharan Africa}
+\subtitle{Analisi Empirica e Variabili di Modello}
+\author{Gruppo F: Bondi, Dal Ben, Michetti, Proietti, Veronese}
+\date{\today}
+
+\begin{document}
+    
+    % --- Titolo ---
+    \begin{frame}
+        \titlepage
+    \end{frame}
+    
+    % --- SLIDE 1: Recap Domanda di Ricerca ---
+    \begin{frame}{Recap: Domanda di Ricerca}
+        La crescita economica è sufficiente per ridurre la povertà multidimensionale oppure sono necessari interventi mirati sul capitale umano e le infrastrutture?
+        \vspace{0.5cm}
+        \begin{block}{Obiettivo dello studio}
+            Analizzare l'impatto dei fattori socio-economici sull'indice di sviluppo umano nei contesti dell'Africa Subsahariana.
+        \end{block}
+    \end{frame}
+    
+    % --- SLIDE 2: Spiegazione Scelta Paesi ---
+    \begin{frame}{Perché questi paesi? (Senegal, Ghana, Nigeria, Sud Africa)}
+        I paesi sono stati selezionati per rappresentare la diversità del continente:
+        \begin{itemize}
+            \item \textbf{Eterogeneità:} Diversi stadi di sviluppo multidimensionale.
+            \item \textbf{Strutture Economiche:} Confronto tra economie basate sulle risorse e mercati più diversificati.
+            \item \textbf{Disponibilità Dati:} Presenza di dataset comparabili tra le fonti World Bank e Our World in Data.
+        \end{itemize}
+    \end{frame}
+    
+   
+    % --- SLIDE 3: Spiegazione Scelta Regressori e Variabile Dipendente ---
+    \begin{frame}{Variabili d'interesse}
+        Abbiamo selezionato l'\textbf{HDI} come variabile dipendente, spiegata dai seguenti regressori:
+    \begin{table}
+        \centering
+        \begin{tabular}{|l|c|} % 'l' per allineato a sinistra, 'c' per centrato
+            \hline
+            \textbf{Regressore} & \textbf{Descrizione} \\ \hline
+            FDI (\% PIL) & Investimenti esteri netti in rapporto al PIL \\ \hline
+            Accesso elettricità & \% popolazione con elettricità \\ \hline
+            Acqua potabile & \% popolazione con accesso base \\ \hline
+            Fertilità & Numero medio figli per donna \\ \hline
+            PIL pro capite & Reddito medio per abitante \\ \hline
+            Mortalità (M/F) & Morti adulti per 1000 abitanti \\ \hline
+            Popolazione totale & Numero abitanti \\ \hline
+        \end{tabular}
+    \end{table}
+    \end{frame}
+
+    % --- SLIDE 4: HDI (Andamento Generale) ---
+    \begin{frame}{HDI nei paesi dell'Africa Sub-Sahariana}
+        \begin{columns}
+            \begin{column}{0.5\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{ggplot2 line chart 1.pdf}
+                \captionof{figure}{Andamento HDI Africa Sub-Sahariana/Mondo}
+            \end{column}
+            \begin{column}{0.5\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{ggplot2 line chart 2.pdf}
+                \captionof{figure}{Andamento dell'HDI nei paesi presi in esame}
+            \end{column}
+        \end{columns}
+    \end{frame}
+
+
+    % --- SLIDE 5: GDP per Capita ---
+    \begin{frame}{Analisi del GDP per Capita}
+        \begin{columns}
+            \begin{column}{0.55\textwidth}
+                \begin{itemize}
+                    \item Il Sud Africa presenta un GDP nettamente più elevato rispetto agli altri.
+                    \item Nigeria, Ghana e Senegal mostrano un andamento simile, con la Nigeria che guida il gruppo dei tre.
+                \end{itemize}
+            \end{column}
+            \begin{column}{0.45\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{ggplot2 line chart 3.pdf}
+                \captionof{figure}{Trend GDP}
+            \end{column}
+        \end{columns}
+    \end{frame}
+
+    % --- SLIDE 6: Acqua ed Elettricità ---
+    \begin{frame}{Infrastrutture: Acqua ed Elettricità}
+        \begin{columns}
+            \begin{column}{0.5\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{ggplot2 line chart 5.pdf}
+                \captionof{figure}{Trend Accesso Acqua}
+            \end{column}
+            \begin{column}{0.5\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{elet .png}
+                \captionof{figure}{Trend Elettricità}
+            \end{column}
+        \end{columns}
+    \end{frame}
+
+    % --- SLIDE 7: Analisi Comparativa (Fertilità, Mortalità, Popolazione) ---
+    \begin{frame}{Analisi Comparativa: Demografia e Salute}
+        \begin{columns}[t]
+            \begin{column}{0.32\textwidth}
+                \centering
+                \textbf{\small Fertilità} \\
+                \vspace{0.1cm}
+                \includegraphics[width=\textwidth]{ggplot2 line chart 4.pdf}
+            \end{column}
+            \begin{column}{0.32\textwidth}
+                \centering
+                \textbf{\small Mortalità} \\
+                \vspace{0.1cm}
+                \includegraphics[width=\textwidth]{ggplot2 line chart 6.pdf}
+            \end{column}
+            \begin{column}{0.32\textwidth}
+                \centering
+                \textbf{\small Popolazione} \\
+                \vspace{0.1cm}
+                \includegraphics[width=\textwidth]{ggplot2 line chart 7.pdf}
+            \end{column}
+        \end{columns}
+        \vspace{0.4cm}
+        \begin{block}{Osservazione Chiave}
+            \small Pur avendo il GDP più alto, il Sud Africa non primeggia in tutti gli indicatori. Questo conferma che la sola ricchezza monetaria non garantisce automaticamente un tenore di vita superiore in ogni dimensione.
+        \end{block}
+    \end{frame}
+
+    % --- SLIDE 8: Investimenti Stranieri ---
+    \begin{frame}{Investimenti Stranieri (FDI)}
+        \begin{columns}
+            \begin{column}{0.55\textwidth}
+                Analisi degli investimenti netti:
+                \begin{itemize}
+                    \item Trend generale in aumento, ad eccezione del Ghana che mostra una flessione.
+                    \item Caso Senegal: crescita esponenziale negli ultimi anni della serie storica.
+                \end{itemize}
+            \end{column}
+            \begin{column}{0.45\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{ggplot2 line chart 9.pdf}
+                \captionof{figure}{FDI (\% PIL)}
+            \end{column}
+        \end{columns}
+    \end{frame}
+
+    % --- SLIDE FINALE: Sviluppo del Modello ---
+    \begin{frame}{Sviluppo del Modello}
+        L'obiettivo finale della ricerca si articolerà in:
+        \begin{itemize}
+            \item \textbf{Costruzione di un modello di regressione lineare panel} per quantificare il peso di ciascun regressore sull'HDI.
+            \item \textbf{Verifica delle ipotesi}: Analizzare se i fattori infrastrutturali (Acqua/Luce) pesano più dei fattori puramente monetari (GDP/FDI).
+            \item \textbf{Analisi dei residui}: Valutare l'efficacia del modello nel prevedere i cambiamenti nei diversi contesti nazionali analizzati.
+        \end{itemize}
+    \end{frame}
+
+\end{document}
