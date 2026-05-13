@@ -6,23 +6,23 @@ date: "May 14, 2026"
 format:
   beamer:
     theme: Madrid
-    colortheme: spruce
+    colortheme: default
     fonttheme: structurebold
     aspectratio: 43
     toc: false
     slide-level: 2
     header-includes: |
       \usepackage{booktabs}
-      \definecolor{sprucegreen}{RGB}{10, 45, 90}
-      \setbeamercolor{frametitle}{bg=sprucegreen, fg=white}
-      \setbeamercolor{title separator}{fg=sprucegreen}
-      \setbeamercolor{progress bar}{fg=sprucegreen}
+      \definecolor{darkblue}{RGB}{10, 45, 90}
+      \setbeamercolor{frametitle}{bg=darkblue, fg=white}
+      \setbeamercolor{title separator}{fg=darkblue}
+      \setbeamercolor{progress bar}{fg=darkblue}
       \setbeamerfont{title}{size=\LARGE}
       \setbeamerfont{subtitle}{size=\large}
       \setbeamertemplate{footline}{}
       \setbeamertemplate{navigation symbols}{}
-      \setbeamercolor{block title}{bg=sprucegreen, fg=white}
-      \setbeamercolor{block body}{bg=sprucegreen!10, fg=black}
+      \setbeamercolor{block title}{bg=darkblue, fg=white}
+      \setbeamercolor{block body}{bg=darkblue!10, fg=black}
       \setbeamerfont{title}{size=\LARGE}
       \setbeamerfont{subtitle}{size=\large}
       \setbeamertemplate{footline}{}
@@ -209,19 +209,75 @@ pdata <- pdata.frame(data, index = c("country", "year"))
 ```
 
 
+## Dove eravamo rimasti - HDI e sviluppo umano in Africa Sub-Sahariana
+```{r plot-hdi-country1, fig.width=10, fig.height=5.5, out.width="100%"} 
+ggplot(hdi_3, aes(x = year, y = HDI, color = country)) +
+  geom_line(size = 1.2) +
+  labs(
+    title = "HDI Nigeria, Ghana, Senegal, Sudafrica",
+    x = "Anno",
+    y = "HDI",
+    color = "Paese"
+  ) +
+  scale_x_continuous(breaks = seq(1990, 2023, by = 5)) +
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = 0.05)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+
+## Analisi precedenti - GDP per capita (current US$) nei 4 paesi
+```{r plot-gdp-country, fig.width=10, fig.height=5.5, out.width="100%"}
+ggplot(gdp_long, aes(x = year, y = gdp, color = Country.Name)) +
+  geom_line(size = 1.2) +
+  labs(
+    title = "GDP per capita (current US$)",
+    x = "Anno",
+    y = "GDP per capita (current US$)",
+    color = "Paese"
+  ) +
+  theme_minimal()
+```
+
+
 ## Obiettivi dell'analisi
 
-\begin{itemize}
-  \item Confrontare l'andamento dell'\textbf{Indice di Sviluppo Umano (HDI)} nell'Africa Sub-Sahariana rispetto al resto del mondo (1990--2023)
-  \item Analizzare le differenze tra \textbf{Nigeria, Ghana, Senegal e Sudafrica} su indicatori chiave: PIL, fertilità, acqua, elettricità, mortalità
-  \item Stimare l'effetto causale dei determinanti dell'HDI tramite \textbf{modelli a effetti fissi} con interazioni per paese
-  \item Valutare l'impatto di eventi di crisi (\textbf{2008, COVID-19}) sullo sviluppo umano
-\end{itemize}
+:::::: {.columns}
+::: {.column width="45%"}
+\begin{block}{Fase 1: HDI globale}
+Confrontare l'andamento dell'\textbf{Indice di Sviluppo Umano (HDI)} nell'Africa Sub-Sahariana rispetto al resto del mondo (1990--2023)
+\end{block}
+:::
+
+\vspace{0.5cm}
+
+::: {.column width="45%"}
+\begin{block}{Fase 2: Confronto tra paesi}
+Analizzare le differenze tra \textbf{Nigeria, Ghana, Senegal e Sudafrica} su indicatori chiave: PIL, fertilità, acqua, elettricità, mortalità
+\end{block}
+:::
+::::::
+
+## Domande di ricerca
+
+:::::: {.columns}
+::: {.column width="45%"}
+\begin{block}{Domanda 1: Determinanti dell'HDI}
+La creascita economica si traduce in miglioramenti dell'HDI? Quali sono i determinanti più influenti?
+\end{block}
+:::
+
+\vspace{0.5cm}
+
+::: {.column width="45%"}
+\begin{block}{Domanda 2: Shock globali}
+Qual è stato l'impatto delle crisi globali (2008, COVID-19) sull'HDI nei paesi analizzati? Esistono differenze significative nella resilienza tra i paesi?
+\end{block}
+:::
+::::::
 
 \vspace{0.5em}
 \textit{Dati: UNDP Human Development Report, World Bank Open Data}
 
----
 
 ## Studio preliminare: Matrice di Correlazione
 
@@ -250,15 +306,24 @@ corrplot(cor_matrix, method="color", type="upper",
 
 ## Modelli econometrici: Strategia di stima
 
+\begin{block}{Modello 1 - Effetti fissi con interazioni PLM}
+Controlla per eterogeneità non osservata stabile nel tempo
+\end{block}
+
+\vspace{0.4em}
+
 \begin{itemize}
-  \item \textbf{Modello a effetti fissi (PLM)} — controlla per eterogeneità non osservata stabile nel tempo
   \item \textbf{Interazioni variabile $\times$ paese} — slope eterogenei: ogni paese reagisce diversamente ai regressori
   \item \textbf{Errori standard robusti (HC1)} — correggono per eteroschedasticità
   \item Variabili incluse: mortalità, elettricità, fertilità, $\log(\text{GDP})$, accesso all'acqua, FDI
 \end{itemize}
 
 \vspace{0.4em}
-\textbf{Modello 2} aggiunge dummy di crisi: \textit{crisi finanziaria 2008--09} e \textit{COVID-19 2020--21}
+
+\begin{block}{Modello 2}
+Aggiunta di dummy crisi: \textit{crisi finanziaria 2008--09} e \textit{COVID-19 2020--21}
+\end{block}
+
 
 ## Modello 1 — Effetti fissi con interazioni
 
@@ -278,6 +343,16 @@ model <- plm(HDI ~ Mortality*as.factor(country) + Electricity*as.factor(country)
                    data = pdata, model = "within", vcov = function(x) vcovHC(x, type = "HC1"))
 summary(model) |> coef() |> as.data.frame() |> xtable::xtable()
 ```
+
+
+## Test di diagnostica - Eteroschedasticità
+```{r, echo=TRUE}
+library(lmtest)
+bptest(model)
+```
+
+Il test di Breusch-Pagan non evidenzia la presenza di eteroschedasticità (p-value > 0.05). Tuttavia, considerando la natura panel dei dati e la complessità del modello, si è comunque scelto di utilizzare errori standard robusti HC1.
+
 ```{r, include=FALSE}
 results <- summary(model) |> coef() |> as.data.frame() 
 rownames(results) <- gsub("as.factor\\(country\\)", "", rownames(results))
@@ -352,7 +427,7 @@ ggplot(df, aes(x = log(gdp), y = HDI, color = country)) +
 \begin{itemize}
   \item \textbf{Coefficienti di interazione}: non tutti i paesi convertono l’aumento del reddito in miglioramenti dell’HDI con la stessa efficienza.
   \item Maggiore il coefficiente di interazione $log(gdp)*as.factor(country)$ $\rightarrow$ più efficiente è la trasformazione del reddito in sviluppo umano.
-  \item \textbf{Il Sudafrica} $\rightarrow$ Mostra un coefficiente di interazione più alto, indicando una maggiore capacità di tradurre la crescita economica in miglioramenti dell’HDI rispetto agli altri paesi.
+  \item \textbf{Sudafrica} $\rightarrow$ Mostra un coefficiente di interazione più alto, indicando una maggiore capacità di tradurre la crescita economica in miglioramenti dell’HDI rispetto agli altri paesi.
   \item \textbf{Senegal} $\rightarrow$ La crescita economica rimane "disconnessa" dal benessere sociale, suggerendo barriere strutturali o inefficienze nella spesa.
 \end{itemize}
 
@@ -447,10 +522,13 @@ cat("}")
 \begin{block}{Riforme Istituzionali}
 Per i paesi con bassa interazione, la priorità è migliorare la governance, la trasparenza e l'efficienza della spesa pubblica per tradurre meglio la crescita economica in sviluppo umano.
 \end{block}
+
 \begin{block}{Protezione sociale e prevenzione economica}
 Creazione di fondi di stabilizzazione e reti di sicurezza sociale per proteggere i più vulnerabili durante shock economici, con particolare attenzione a Nigeria e Senegal.
 Fondi necessari per investimenti in servizi educativi e sanitari per protezione durante le crisi future. 
 \end{block}
+
+## Sviluppi futuri e proposte di policy
 
 \begin{block}{Diversificazione economica}
 Ridurre la dipendenza da settori volatili (es. risorse naturali) e promuovere lo sviluppo di industrie manifatturiere e tecnologiche per aumentare la resil ienza economica e migliorare l'HDI a lungo termine.
