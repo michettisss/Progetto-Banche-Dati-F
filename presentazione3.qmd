@@ -326,6 +326,43 @@ knitr::kable(rbind(results_fert, results_mort),
              col.names = c("Coefficiente", "P-value", "Significativo"))
 ```
 
+## Relazione tra reddito e sviluppo umano per paese
+```{r plot-gdp-hdi, fig.width=10, fig.height=5.5, out.width="100%"}
+palette4 <- c("#0A2D5A","#E07B39","#2C8C4A","#C0392B","#888888")
+df <- as.data.frame(pdata)
+ggplot(df, aes(x = log(gdp), y = HDI, color = country)) +
+  geom_point(alpha = 0.5, size = 1.8) +
+  geom_smooth(method = "lm", se = FALSE, size = 1.2) +
+  scale_color_manual(values = palette4) +
+  labs(x = "log(GDP pro capite)", y = "HDI", color = NULL) +
+  tema
+```
+
+::: {.block}
+{\footnotesize A parità di crescita del reddito, l’impatto sull’HDI varia sensibilmente tra paesi.}
+:::
+
+## L'efficienza di trasformazione del reddito in sviluppo umano
+\begin{itemize}
+  \item \textbf{Coefficienti di interazione}: non tutti i paesi convertono l’aumento del reddito in miglioramenti dell’HDI con la stessa efficienza.
+  \item Maggiore il coefficiente di interazione $log(gdp)*as.factor(country)$ $\rightarrow$ più efficiente è la trasformazione del reddito in sviluppo umano.
+  \item \textbf{Il Sudafrica} $\rightarrow$ Mostra un coefficiente di interazione più alto, indicando una maggiore capacità di tradurre la crescita economica in miglioramenti dell’HDI rispetto agli altri paesi.
+  \item \textbf{Senegal} $\rightarrow$ La crescita economica rimane "disconnessa" dal benessere sociale, suggerendo barriere strutturali o inefficienze nella spesa.
+\end{itemize}
+
+
+## Le altre variabili: Fertilità, Acqua, Elettricità e Mortalità
+
+\begin{itemize}
+  \item L'Africa Sub-Sahariana ha migliorato l'HDI dal 1990, ma il \textbf{divario con il livello mondiale rimane ampio}
+  \item Il \textbf{Sudafrica} registra l'HDI più alto tra i quattro paesi; la \textbf{Nigeria} il più basso — nonostante il PIL pro capite più elevato della Nigeria rispetto a Ghana e Senegal in alcuni periodi
+  \item Il $\log(\text{GDP})$ e la \textbf{fertilità} sono i determinanti con effetti più robusti sull'HDI, ma con pendenze eterogenee per paese
+  \item \textbf{Multicollinearità elevata} (VIF $\gg$ 10): mortalità, elettricità e accesso all'acqua sono proxy correlate delle stesse condizioni di sviluppo $\Rightarrow$ modello semplificato preferibile
+  \item Le crisi 2008 e COVID-19 hanno avuto impatti differenziati: la Nigeria e il Senegal mostrano maggiore vulnerabilità agli shock esterni
+\end{itemize}
+
+
+
 ## Modello 2 — Aggiunta dummy di crisi
 Abbiamo testato la resilienza dell'HDI agli shock globali:
 $$\text{HDI}_{it} = \dots + \beta_1 D_{2008} + \beta_2 D_{2020} + \epsilon_{it}$$
@@ -392,34 +429,36 @@ knitr::kable(
 cat("}")
 ```
 
-## Relazione tra reddito e sviluppo umano per paese
-```{r plot-gdp-hdi, fig.width=10, fig.height=5.5, out.width="100%"}
-palette4 <- c("#0A2D5A","#E07B39","#2C8C4A","#C0392B","#888888")
-df <- as.data.frame(pdata)
-ggplot(df, aes(x = log(gdp), y = HDI, color = country)) +
-  geom_point(alpha = 0.5, size = 1.8) +
-  geom_smooth(method = "lm", se = FALSE, size = 1.2) +
-  scale_color_manual(values = palette4) +
-  labs(x = "log(GDP pro capite)", y = "HDI", color = NULL) +
-  tema
-```
-
-::: {.block}
-{\footnotesize A parità di crescita del reddito, l’impatto sull’HDI varia sensibilmente tra paesi.}
-:::
-## Risultati principali
-
+## Analisi della resilienza: Shock 2008 e COVID-19
 \begin{itemize}
-  \item L'Africa Sub-Sahariana ha migliorato l'HDI dal 1990, ma il \textbf{divario con il livello mondiale rimane ampio}
-  \item Il \textbf{Sudafrica} registra l'HDI più alto tra i quattro paesi; la \textbf{Nigeria} il più basso — nonostante il PIL pro capite più elevato della Nigeria rispetto a Ghana e Senegal in alcuni periodi
-  \item Il $\log(\text{GDP})$ e la \textbf{fertilità} sono i determinanti con effetti più robusti sull'HDI, ma con pendenze eterogenee per paese
-  \item \textbf{Multicollinearità elevata} (VIF $\gg$ 10): mortalità, elettricità e accesso all'acqua sono proxy correlate delle stesse condizioni di sviluppo $\Rightarrow$ modello semplificato preferibile
-  \item Le crisi 2008 e COVID-19 hanno avuto impatti differenziati: la Nigeria e il Senegal mostrano maggiore vulnerabilità agli shock esterni
+  \item \textbf{Resilienza differenziata}: I paesi con coefficienti negativi significativi per le dummy di crisi mostrano una maggiore vulnerabilità agli shock globali.
+  \item \textbf{COVID-19}: La pandemia ha avuto un impatto negativo significativo sull'HDI, con effetti più pronunciati in \textsf{Nigeria}e \textsf{Senegal} rispetto al Sudafrica.
+  \item \textbf{Crisi 2008}: L'effetto è meno pronunciato, ma ancora negativo per la Nigeria, suggerendo una maggiore esposizione agli shock finanziari globali.
+  \item \textbf{Implicazioni politiche}: Necessità di strategie di mitigazione del rischio e diversificazione economica per aumentare la resilienza agli shock futuri, soprattutto nei paesi più vulnerabili.
 \end{itemize}
 
-## Limiti e sviluppi futuri
+## Sviluppi futuri e proposte di policy
+\begin{block}{Riforme Istituzionali}
+Per i paesi con bassa interazione, la priorità è migliorare la governance, la trasparenza e l'efficienza della spesa pubblica per tradurre meglio la crescita economica in sviluppo umano.
+\end{block}
+\begin{block}{Protezione sociale e prevenzione economica}
+Creazione di fondi di stabilizzazione e reti di sicurezza sociale per proteggere i più vulnerabili durante shock economici, con particolare attenzione a Nigeria e Senegal.
+Fondi necessari per investimenti in servizi educativi e sanitari per protezione durante le crisi future. 
+\end{block}
+
+\begin{block}{Diversificazione economica}
+Ridurre la dipendenza da settori volatili (es. risorse naturali) e promuovere lo sviluppo di industrie manifatturiere e tecnologiche per aumentare la resil ienza economica e migliorare l'HDI a lungo termine.
+\end{block}
+
+\begin{block}{Monitoraggio e valutazione continua}
+Adottare l'Elasticità sociale del reddito come nuovo KPI per valutare il successo di un goverso oltre alla crescita economica (GDP), con report annuali per monitorare i progressi verso obiettivi di sviluppo umano più inclusivi e sostenibili.
+\end{block}
+
+
+## Limiti della ricerca
 
 \begin{itemize}
+  \item Problemi di mancanza di dati e qualità: alcune variabili chiave (es. MPI) presentavano lacune temporali o misurazioni inconsistenti tra paesi
   \item Campione ridotto (4 paesi, 34 anni): potere statistico limitato per i test di diagnostica
   \item Possibile \textbf{autocorrelazione seriale} nei residui — stimatori GMM come alternativa
   \item Estendere l'analisi ad altri paesi dell'Africa Sub-Sahariana per una maggiore generalizzabilità
