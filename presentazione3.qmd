@@ -262,7 +262,7 @@ Analizzare le differenze tra \textbf{Nigeria, Ghana, Senegal e Sudafrica} su ind
 :::::: {.columns}
 ::: {.column width="45%"}
 \begin{block}{Domanda 1: Determinanti dell'HDI}
-La creascita economica si traduce in miglioramenti dell'HDI? Quali sono i determinanti più influenti?
+La crescita economica si traduce in miglioramenti dell'HDI? Quali sono i determinanti più influenti?
 \end{block}
 :::
 
@@ -327,15 +327,45 @@ Aggiunta di dummy crisi: \textit{crisi finanziaria 2008--09} e \textit{COVID-19 
 
 ## Modello 1 — Effetti fissi con interazioni
 
-Il modello stima l'impatto dei regressori sull'HDI:
+Il modello \textit{within} stima l'impatto dei regressori sull'HDI:
 $$
 \text{HDI}_{it} = \alpha_i + \beta_1 \text{Mort}_{it} + \beta_2 \text{Ele}_{it} + \beta_3 \text{Fert}_{it} + \beta_4 \log(\text{GDP})_{it} + \beta_5 \text{Wat}_{it} + \epsilon_{it}
 $$ 
 
 \begin{itemize}
-  \item $\alpha_i$: Cattura le caratteristiche specifiche di ogni paese che non variano nel tempo (cultura, posizione geografica, istituzioni storiche).
-  \item elimina bias da variabili omesse costanti nel tempo.
-  \item Ci permette di vedere come le variazioni \textit{interne} ai paesi influenzano l'HDI.
+  \item \textbf{Variabile Dipendente ($HDI_{it}$)}: Rappresenta l'Indice di Sviluppo Umano osservato per il paese $i$ nell'anno $t$.
+  \item $\alpha_i$: Cattura le caratteristiche strutturali di ogni paese che non variano nel tempo (cultura, posizione geografica, istituzioni storiche).
+  \item \textbf{Vettore dei Regressori $\beta_j$}: Variabili demografiche (\textit{Mortalità, Fertilità}) e infrastrutturali (\textit{Elettricità, Acqua, PIL}) per individuare l'effetto delle variazioni temporali di ogni regressore sull'HDI all'interno di ciascun paese.
+\end{itemize}
+
+## Modello 1 — Effetti fissi con interazioni PLM
+
+\begin{itemize}
+  \item \textbf{Logaritmo del PIL ($\log(GDP)$)}: La trasformazione logaritmica permette di interpretare il coefficiente $\beta_4$ come l'elasticità dell'HDI rispetto alla crescita economica.
+  \item \textbf{Termine di Errore ($\epsilon_{it}$)}: Cattura le fluttuazioni stocastiche e le componenti non osservate tempo-varianti.
+\end{itemize}
+
+\vspace{0.5cm}
+
+\begin{block}{Obiettivo della Stima}
+Stimare la significatività statistica e l'intensità di ogni canale di sviluppo a parità degli altri fattori.
+\end{block}
+
+
+## Scelta Metodologica: Lo stimatore Fixed Effects (Within)
+
+\begin{itemize}
+  \item \textbf{Differenze strutturali tra paesi} (es. clima, risorse naturali) possono influenzare l'HDI ma non variano nel tempo
+  \item \textbf{Eterogeneità non osservata} $\rightarrow$ ogni paese ha un suo "punto di partenza" dell'HDI
+  \item \textbf{Intercetta $\alpha_i$ specifica per ogni paese}: cattura le differenze strutturali fisse che influenzano l'HDI
+\end{itemize}
+
+## Scelta Metodologica: Lo stimatore Fixed Effects (Within)
+
+\begin{itemize}
+  \item \textbf{Analisi delle variazioni Within}: I coefficienti riflettono l'impatto delle variazioni temporali interne a ciascun paese, isolando l'effetto dinamico delle variabili indipendenti
+  \item \textbf{Interpretazione interazioni}: i coefficienti stimati delle \textbf{interazioni} riflettono solo l'effetto delle variazioni temporali all'interno di ogni paese
+  \item \textbf{Riduzione \textit{omitted variable bias}} $\rightarrow$  stima più accurata del nesso tra PIL, demografia e sviluppo umano (HDI).
 \end{itemize}
 
 ```{r, include=FALSE}
@@ -423,23 +453,36 @@ ggplot(df, aes(x = log(gdp), y = HDI, color = country)) +
 {\footnotesize A parità di crescita del reddito, l’impatto sull’HDI varia sensibilmente tra paesi.}
 :::
 
-## L'efficienza di trasformazione del reddito in sviluppo umano
+
+## L'efficienza di trasformazione del reddito (GDP) in HDI
+
 \begin{itemize}
-  \item \textbf{Coefficienti di interazione}: non tutti i paesi convertono l’aumento del reddito in miglioramenti dell’HDI con la stessa efficienza.
-  \item Maggiore il coefficiente di interazione $log(gdp)*as.factor(country)$ $\rightarrow$ più efficiente è la trasformazione del reddito in sviluppo umano.
-  \item \textbf{Sudafrica} $\rightarrow$ Mostra un coefficiente di interazione più alto, indicando una maggiore capacità di tradurre la crescita economica in miglioramenti dell’HDI rispetto agli altri paesi.
-  \item \textbf{Senegal} $\rightarrow$ La crescita economica rimane "disconnessa" dal benessere sociale, suggerendo barriere strutturali o inefficienze nella spesa.
+  \item \textbf{Elasticità differenziata}: I \textbf{coefficienti di interazione} rivelano che l'impatto marginale del reddito non è uniforme tra le nazioni.
+  \item \textbf{Efficienza di conversione}: Un coefficiente $\log(gdp) \times \text{Paese}$ più elevato indica una maggiore capacità del sistema-paese di tradurre la crescita economica in benessere multidimensionale.
+\end{itemize}
+
+Un incremento dell'1% del PIL pro capite produce un aumento di $[\beta_4/100]$ punti di HDI, a parità degli altri regressori.
+
+\begin{block}{Conclusione}
+L'elasticità HDI-PIL conferma i rendimenti decrescenti della ricchezza: la crescita monetaria è condizione necessaria ma non sufficiente per il progresso umano.
+\end{block}
+
+## Eterogeneità tra paesi: Sudafrica vs Nigeria e Senegal
+Le interazioni misurano lo scostamento dalla categoria baseline Ghana. I risultati mostrano differenze significative nell'efficienza di conversione del reddito in sviluppo umano:
+
+\begin{itemize}
+  \item \textbf{Sudafrica (Leader)}: Mostra la pendenza più elevata, segnalando un'architettura istituzionale più efficace nel veicolare risorse verso i pilastri dell'HDI.
+  \item \textbf{Senegal e Nigeria}: Presentano una crescita "disconnessa" dal progresso sociale, suggerendo la presenza di barriere strutturali o inefficienze allocative nella spesa pubblica.
 \end{itemize}
 
 
 ## Le altre variabili: Fertilità, Acqua, Elettricità e Mortalità
 
 \begin{itemize}
-  \item L'Africa Sub-Sahariana ha migliorato l'HDI dal 1990, ma il \textbf{divario con il livello mondiale rimane ampio}
   \item Il \textbf{Sudafrica} registra l'HDI più alto tra i quattro paesi; la \textbf{Nigeria} il più basso — nonostante il PIL pro capite più elevato della Nigeria rispetto a Ghana e Senegal in alcuni periodi
-  \item Il $\log(\text{GDP})$ e la \textbf{fertilità} sono i determinanti con effetti più robusti sull'HDI, ma con pendenze eterogenee per paese
-  \item \textbf{Multicollinearità elevata} (VIF $\gg$ 10): mortalità, elettricità e accesso all'acqua sono proxy correlate delle stesse condizioni di sviluppo $\Rightarrow$ modello semplificato preferibile
-  \item Le crisi 2008 e COVID-19 hanno avuto impatti differenziati: la Nigeria e il Senegal mostrano maggiore vulnerabilità agli shock esterni
+  \item Il \textbf{$\log(\text{GDP})$} e la \textbf{fertilità} sono i determinanti con effetti più robusti sull'HDI, ma con pendenze eterogenee per paese
+  \item \textbf{L'impatto dei servizi di base}: L'accesso all'acqua emerge come un driver di sviluppo più robusto e immediato rispetto all'elettricità nei modelli stimati.
+  \item \textbf{Fertilità}: un coefficiente negativo e significativo indica che un aumento del tasso di fertilità è associato a una diminuzione dell'HDI, probabilmente a causa dell'aumento della dipendenza demografica e della pressione sulle risorse.
 \end{itemize}
 
 
