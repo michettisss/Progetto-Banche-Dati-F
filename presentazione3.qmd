@@ -518,7 +518,7 @@ cat("}")
   \item \textbf{Implicazioni politiche}: Necessità di strategie di mitigazione del rischio e diversificazione economica per aumentare la resilienza agli shock futuri, soprattutto nei paesi più vulnerabili.
 \end{itemize}
 
-## Sviluppi futuri e proposte di policy
+## Sviluppi futuri e proposte di policy !
 \begin{block}{Riforme Istituzionali}
 Per i paesi con bassa interazione, la priorità è migliorare la governance, la trasparenza e l'efficienza della spesa pubblica per tradurre meglio la crescita economica in sviluppo umano.
 \end{block}
