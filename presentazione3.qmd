@@ -458,7 +458,7 @@ Adottare l'Elasticità sociale del reddito come nuovo KPI per valutare il succes
 ## Limiti della ricerca
 
 \begin{itemize}
-  \item Problemi di mancanza di dati e qualità: alcune variabili chiave (es. MPI) presentavano lacune temporali o misurazioni inconsistenti tra paesi
+  \item Problemi di mancanza di dati e qualità: alcune variabili chiave (es. MPI) presentavano lacune temporali o misurazioni inconsistenti tra paesi, 
   \item Campione ridotto (4 paesi, 34 anni): potere statistico limitato per i test di diagnostica
   \item Possibile \textbf{autocorrelazione seriale} nei residui — stimatori GMM come alternativa
   \item Estendere l'analisi ad altri paesi dell'Africa Sub-Sahariana per una maggiore generalizzabilità
