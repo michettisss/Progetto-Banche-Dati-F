@@ -13,10 +13,16 @@ format:
     slide-level: 2
     header-includes: |
       \usepackage{booktabs}
-      \definecolor{darkblue}{RGB}{10, 45, 90}
-      \setbeamercolor{frametitle}{bg=darkblue, fg=white}
-      \setbeamercolor{title separator}{fg=darkblue}
-      \setbeamercolor{progress bar}{fg=darkblue}
+      \definecolor{sprucegreen}{RGB}{10, 45, 90}
+      \setbeamercolor{frametitle}{bg=sprucegreen, fg=white}
+      \setbeamercolor{title separator}{fg=sprucegreen}
+      \setbeamercolor{progress bar}{fg=sprucegreen}
+      \setbeamerfont{title}{size=\LARGE}
+      \setbeamerfont{subtitle}{size=\large}
+      \setbeamertemplate{footline}{}
+      \setbeamertemplate{navigation symbols}{}
+      \setbeamercolor{block title}{bg=sprucegreen, fg=white}
+      \setbeamercolor{block body}{bg=sprucegreen!10, fg=black}
       \setbeamerfont{title}{size=\LARGE}
       \setbeamerfont{subtitle}{size=\large}
       \setbeamertemplate{footline}{}
