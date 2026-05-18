@@ -112,7 +112,7 @@ wat <- wat[c(1:4), c(-2,-3,-4)]
 wat <- wat[, c(1, 12:ncol(wat))]
 if ("Country Name" %in% names(wat)) names(wat)[names(wat) == "Country Name"] <- "Country.Name"
 wat[,-1] <- lapply(wat[,-1], function(x) as.numeric(as.character(x)))
-wat_long <- wat %>% pivot_longer(-Country.Name, names_to="year", values_to="Acqua")
+wat_long <- wat %>% pivot_longer(cols =-Country.Name, names_to="year", values_to="Acqua")
 wat_long$year <- as.integer(sub("\\[.*","",wat_long$year))
 
 # Mortalità

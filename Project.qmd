@@ -4,6 +4,100 @@ author: "Gruppo F"
 format: html
 ---
 
+# PROVA RIPRODUCIBILITÀ
+```{r}
+install.packages("wbstats")
+library(wbstats)
+
+paesi <- c("GHA", "NGA", "SEN", "ZAF")
+
+dati <- wb_data(
+  indicator = c(
+    "gdp"           = "NY.GDP.PCAP.CD",    # GDP pro capite corrente
+    "Electricity"   = "EG.ELC.ACCS.ZS",   # accesso elettricità %
+    "Acqua"         = "SH.H2O.BASW.ZS",   # accesso acqua %
+    "Fertility"     = "SP.DYN.TFRT.IN",   # tasso fertilità
+    "Mortality_f"     = "SP.DYN.AMRT.FE",      # mortalità femminile
+    "Mortality_m"     = "SP.DYN.AMRT.MA",      # mortalità maschile
+    "FDI"           = "BX.KLT.DINV.WD.GD.ZS", # FDI netti % PIL
+    "Population"    = "SP.POP.TOTL"        # popolazione totale
+  ),
+  country    = paesi,
+  start_date = 1990,
+  end_date   = 2023
+)
+# Il dataframe ha già colonne con i nomi che hai dato agli indicatori
+head(dati)
+
+# Rinomina per compatibilità con il tuo codice esistente
+data_wb <- dati %>%
+  rename(
+    country = country,
+    year    = date,
+    Investimenti_Stranieri = FDI
+  )
+data_wb$year <- as.integer(data_wb$year)
+
+# -------------------------------------------------------
+# Dati HDI: UNDP Human Development Report
+# Fonte: https://hdr.undp.org/data-center/human-development-index
+# Scaricati manualmente a maggio 2026
+# Formato: JSON, un file per paese
+# -------------------------------------------------------
+
+# 1. Calcola Mortality come media di maschile e femminile
+data_wb <- data_wb %>%
+  mutate(Mortality = (Mortality_f + Mortality_m) / 2) %>%
+  select(-Mortality_f, -Mortality_m)
+
+hdi.ssa <- fromJSON("hdr-data.json")[, c(2,8,11)]
+names(hdi.ssa)[names(hdi.ssa) == "value"] <- "HDI"
+hdi.ssa$year <- as.integer(hdi.ssa$year)
+hdi.ssa$HDI  <- as.numeric(hdi.ssa$HDI)
+
+hdi.w <- fromJSON("hdi.world.json")[, c(2,8,11)]
+names(hdi.w)[names(hdi.w) == "value"] <- "HDI"
+hdi.w$year <- as.integer(hdi.w$year)
+hdi.w$HDI  <- as.numeric(hdi.w$HDI)
+
+hdi <- rbind(hdi.ssa, hdi.w)
+
+# HDI paesi
+hdi.sen <- fromJSON("hdi.sen.json")[, c(2,8,11)]
+hdi.nga <- fromJSON("hdi.NGA.json")[, c(2,8,11)]
+hdi.gha <- fromJSON("hdi.gha.json")[, c(2,8,11)]
+hdi.zaf <- fromJSON("hdi.zaf.json")[, c(2,8,11)]
+
+for (d in c("hdi.sen","hdi.nga","hdi.gha","hdi.zaf")) {
+  tmp <- get(d)
+  names(tmp)[names(tmp) == "value"] <- "HDI"
+  tmp$year <- as.integer(tmp$year)
+  tmp$HDI  <- as.numeric(tmp$HDI)
+  assign(d, tmp)
+}
+
+# 2. Prepara HDI dai tuoi JSON 
+hdi_all <- rbind(hdi.gha, hdi.nga, hdi.sen, hdi.zaf)
+hdi_all <- hdi_all %>%
+  select(country, year, HDI)
+
+# 3. Unisci HDI con il dataset wbstats
+data_wb <- data_wb %>%
+  left_join(hdi_all, by = c("country", "year"))
+
+# 4. Seleziona e riordina le colonne come nel dataset originale
+data_wb <- data_wb %>%
+  select(country, year, HDI, Mortality, Electricity, 
+         Fertility, gdp, Population, Acqua, Investimenti_Stranieri)
+
+# 5. Rimuovi righe senza HDI
+data_wb <- data_wb %>% filter(!is.na(HDI))
+
+head(data_wb)
+
+data_wb_clean <- na.omit(data_wb) # versione del codice senza NA (senza 1990-2000)
+```
+
 # CONFRONTO SUB-SAHARAN AFRICA CON IL MONDO
 
 ```{r}
