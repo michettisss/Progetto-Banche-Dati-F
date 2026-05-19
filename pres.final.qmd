@@ -1,0 +1,560 @@
+---
+title: "Human Development Index (HDI) in Sub-Saharan Africa"
+subtitle: "Un'analisi comparativa: Nigeria, Ghana, Senegal, Sudafrica"
+author: "Gruppo F: Bondi, Dal Ben, Michetti, Proietti, Veronese"
+date: "May 14, 2026"
+format:
+  beamer:
+    theme: Madrid
+    colortheme: default
+    fonttheme: structurebold
+    aspectratio: 43
+    toc: false
+    slide-level: 2
+    header-includes: |
+      \usepackage{booktabs}
+      \definecolor{darkblue}{RGB}{10, 45, 90}
+      \setbeamercolor{frametitle}{bg=darkblue, fg=white}
+      \setbeamercolor{title separator}{fg=darkblue}
+      \setbeamercolor{progress bar}{fg=darkblue}
+      \setbeamerfont{title}{size=\LARGE}
+      \setbeamerfont{subtitle}{size=\large}
+      \setbeamertemplate{footline}{}
+      \setbeamertemplate{navigation symbols}{}
+      \setbeamercolor{block title}{bg=darkblue, fg=white}
+      \setbeamercolor{block body}{bg=darkblue!10, fg=black}
+      \setbeamerfont{title}{size=\LARGE}
+      \setbeamerfont{subtitle}{size=\large}
+      \setbeamertemplate{footline}{}
+      \setbeamertemplate{navigation symbols}{}
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r setup, include=FALSE}
+# Installazioni (eseguire solo se necessario)
+# install.packages(c("psych","jsonlite","ggplot2","gt","dplyr","tidyr",
+#                    "readxl","plm","car","corrplot","lmtest","xtable", "httr", "purrr"))
+
+library(psych)
+library(jsonlite)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(readxl)
+library(httr)      
+library(purrr)
+library(gt)
+library(plm)
+library(car)
+library(corrplot)
+library(lmtest)
+
+# Tema comune per tutti i grafici
+tema <- theme_minimal(base_size = 13) +
+  theme(
+    axis.text.x  = element_text(angle = 45, hjust = 1),
+    legend.position = "bottom",
+    legend.title = element_text(size = 10),
+    plot.title   = element_blank()   # nessun titolo sulle slide grafici
+  )
+```
+
+```{r}
+# WORLD BANK API (Regressori tramite httr e jsonlite)
+paesi_wb <- "GHA;NGA;SEN;ZAF"
+start_y <- 1990
+end_y <- 2023
+
+# Dizionario degli indicatori della World Bank
+indicators <- list(
+  gdp = "NY.GDP.PCAP.CD",
+  Electricity = "EG.ELC.ACCS.ZS",
+  Acqua = "SH.H2O.BASW.ZS",
+  Fertility = "SP.DYN.TFRT.IN",
+  Mortality_f = "SP.DYN.AMRT.FE",
+  Mortality_m = "SP.DYN.AMRT.MA",
+  Investimenti_Stranieri = "BX.KLT.DINV.WD.GD.ZS",
+  Population = "SP.POP.TOTL"
+)
+
+# Funzione per interrogare direttamente l'API WB
+get_wb_data <- function(code, name) {
+  url <- sprintf(
+    "http://api.worldbank.org/v2/country/%s/indicator/%s?format=json&date=%s:%s&per_page=1000",
+    paesi_wb, code, start_y, end_y
+  )
+  response <- httr::GET(url)
+  raw_data <- jsonlite::fromJSON(httr::content(response, "text", encoding = "UTF-8"))[[2]]
+  raw_data %>%
+    select(country_iso = countryiso3code, year = date, value) %>%
+    mutate(year = as.integer(year)) %>%
+    rename(!!rlang::sym(name) := value)
+}
+
+# Applichiamo la funzione a tutti gli indicatori e uniamo i risultati
+wb_list <- imap(indicators, get_wb_data)
+data_wb <- reduce(wb_list, full_join, by = c("country_iso", "year"))
+
+# Sistemazione dati World Bank (Media mortalità e nomi estesi per il merge)
+data_wb <- data_wb %>%
+  mutate(Mortality = (Mortality_f + Mortality_m) / 2) %>%
+  select(-Mortality_f, -Mortality_m) %>%
+  mutate(country = case_when(
+    country_iso == "GHA" ~ "Ghana",
+    country_iso == "NGA" ~ "Nigeria",
+    country_iso == "SEN" ~ "Senegal",
+    country_iso == "ZAF" ~ "South Africa"
+  )) %>%
+  select(-country_iso)
+
+
+# UNDP DATA (HDI) 
+url_undp <- "https://hdr.undp.org/sites/default/files/2023-24_HDR/HDR23-24_Composite_indices_complete_time_series.csv"
+url_undp <- sub("^\\[.*\\]\\((.*)\\)$", "\\1", url_undp)
+temp_file <- tempfile(fileext = ".csv")
+download.file(url_undp, temp_file, mode = "wb", quiet = TRUE, method = "auto")
+hdi_raw <- read.csv(temp_file)
+# Filtriamo per i paesi che ci interessano + Sub-Saharan Africa e Mondo
+target_entities <- c("Ghana", "Nigeria", "Senegal", "South Africa", "Sub-Saharan Africa", "World")
+
+hdi_clean <- hdi_raw %>%
+  filter(country %in% target_entities) %>%
+  select(country, starts_with("hdi_")) %>%
+  pivot_longer(
+    cols = starts_with("hdi_"),
+    names_to = "year",
+    names_prefix = "hdi_",
+    values_to = "HDI"
+  ) %>%
+  mutate(
+    year = as.integer(year),
+    HDI = as.numeric(HDI)
+  ) %>%
+  filter(year >= start_y & year <= end_y)
+
+
+# CREAZIONE DATASET FINALI 
+
+# Dataset per il grafico globale (Sub-Saharan Africa vs World)
+hdi <- hdi_clean %>% 
+  filter(country %in% c("Sub-Saharan Africa", "World"))
+
+# Dataset per i grafici dei soli paesi
+hdi_3 <- hdi_clean %>% 
+  filter(country %in% c("Ghana", "Nigeria", "Senegal", "South Africa", "Sub-Saharan Africa"))
+
+# Dataset per i modelli (Merge tra World Bank e HDI)
+hdi_paesi <- hdi_clean %>% 
+  filter(!country %in% c("Sub-Saharan Africa", "World"))
+
+# Il dataset finale per PLM e matrici di correlazione
+data <- data_wb %>%
+  inner_join(hdi_paesi, by = c("country", "year")) %>%
+  drop_na(HDI) # Rimuove le righe senza HDI
+
+# Creazione oggetto per plm
+library(plm)
+pdata <- pdata.frame(data, index = c("country", "year"))
+
+# Variabili dummy per i modelli (come nel vostro codice originale)
+data$crisis_2008 <- ifelse(data$year >= 2008 & data$year <= 2009, 1, 0)
+data$covid <- ifelse(data$year >= 2020 & data$year <= 2021, 1, 0)
+pdata_dummy <- pdata.frame(data, index = c("country", "year"))
+```
+
+
+
+## Dove eravamo rimasti - HDI e sviluppo umano in Africa Sub-Sahariana
+```{r plot-hdi-country1, fig.width=10, fig.height=5.5, out.width="100%"} 
+ggplot(hdi_3, aes(x = year, y = HDI, color = country)) +
+  geom_line(size = 1.2) +
+  labs(
+    title = "HDI Nigeria, Ghana, Senegal, Sudafrica",
+    x = "Anno",
+    y = "HDI",
+    color = "Paese"
+  ) +
+  scale_x_continuous(breaks = seq(1990, 2023, by = 5)) +
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = 0.05)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+
+## Analisi precedenti - GDP per capita (current US$) nei 4 paesi
+```{r plot-gdp-country, fig.width=10, fig.height=5.5, out.width="100%"}
+gdp_long <- data %>%
+  select(Country.Name = country, year, gdp) %>%
+  drop_na(gdp)
+
+ggplot(gdp_long, aes(x = year, y = gdp, color = Country.Name)) +
+  geom_line(size = 1.2) +
+  labs(
+    title = "GDP per capita (current US$)",
+    x = "Anno",
+    y = "GDP per capita (current US$)",
+    color = "Paese"
+  ) +
+  theme_minimal()
+```
+
+
+## Obiettivi dell'analisi
+
+:::::: {.columns}
+::: {.column width="45%"}
+\begin{block}{Fase 1: HDI globale}
+Confrontare l'andamento dell'\textbf{Indice di Sviluppo Umano (HDI)} nell'Africa Sub-Sahariana rispetto al resto del mondo (1990--2023)
+\end{block}
+:::
+
+\vspace{0.5cm}
+
+::: {.column width="45%"}
+\begin{block}{Fase 2: Confronto tra paesi}
+Analizzare le differenze tra \textbf{Nigeria, Ghana, Senegal e Sudafrica} su indicatori chiave: PIL, fertilità, acqua, elettricità, mortalità
+\end{block}
+:::
+::::::
+
+## Domande di ricerca
+
+:::::: {.columns}
+::: {.column width="45%"}
+\begin{block}{Domanda 1: Determinanti dell'HDI}
+La crescita economica si traduce in miglioramenti dell'HDI? Quali sono i determinanti più influenti?
+\end{block}
+:::
+
+\vspace{0.5cm}
+
+::: {.column width="45%"}
+\begin{block}{Domanda 2: Shock globali}
+Qual è stato l'impatto delle crisi globali (2008, COVID-19) sull'HDI nei paesi analizzati? Esistono differenze significative nella resilienza tra i paesi?
+\end{block}
+:::
+::::::
+
+\vspace{0.5em}
+\textit{Dati: UNDP Human Development Report, World Bank Open Data}
+
+
+## Studio preliminare: Matrice di Correlazione
+
+:::::: {.columns}
+::: {.column width="50%"}
+```{r plot-corrplot-slide, fig.width=4, fig.height=4, out.width="100%"}
+vars <- data[, c("Mortality","Electricity","Fertility","gdp",
+                 "Population","Acqua","Investimenti_Stranieri")]
+cor_matrix <- cor(vars, use = "complete.obs")
+corrplot(cor_matrix, method="color", type="upper",
+         tl.cex=0.7, tl.col="black",
+         addCoef.col="black", number.cex=0.55,
+         col=colorRampPalette(c("#C0392B","white","#0A2D5A"))(200))
+```
+:::
+::: {.column width="50%"}
+\small
+\textbf{Osservazioni chiave:}
+\begin{itemize}
+  \item Forte correlazione tra HDI e Mortalità (--0.85).
+  \item Elevata collinearità tra PIL, Acqua ed Elettricità.
+  \item \textbf{Nota sul VIF:} La mortalità funge da ``proxy'' delle altre variabili, rendendo il VIF matematicamente esplosivo ma economicamente ridondante.
+\end{itemize}
+:::
+::::::
+
+## Modelli econometrici: Strategia di stima
+
+\begin{block}{Modello 1 - Effetti fissi con interazioni PLM}
+Controlla per eterogeneità non osservata stabile nel tempo
+\end{block}
+
+\vspace{0.4em}
+
+\begin{itemize}
+  \item \textbf{Interazioni variabile $\times$ paese} — slope eterogenei: ogni paese reagisce diversamente ai regressori
+  \item \textbf{Errori standard robusti (HC1)} — correggono per eteroschedasticità
+  \item Variabili incluse: mortalità, elettricità, fertilità, $\log(\text{GDP})$, accesso all'acqua, FDI
+\end{itemize}
+
+\vspace{0.4em}
+
+\begin{block}{Modello 2}
+Aggiunta di dummy crisi: \textit{crisi finanziaria 2008--09} e \textit{COVID-19 2020--21}
+\end{block}
+
+
+## Modello 1 — Effetti fissi con interazioni
+
+Il modello \textit{within} stima l'impatto dei regressori sull'HDI:
+$$
+\text{HDI}_{it} = \alpha_i + \beta_1 \text{Mort}_{it} + \beta_2 \text{Ele}_{it} + \beta_3 \text{Fert}_{it} + \beta_4 \log(\text{GDP})_{it} + \beta_5 \text{Wat}_{it} + \epsilon_{it}
+$$ 
+
+\begin{itemize}
+  \item \textbf{Variabile Dipendente ($HDI_{it}$)}: Rappresenta l'Indice di Sviluppo Umano osservato per il paese $i$ nell'anno $t$.
+  \item $\alpha_i$: Cattura le caratteristiche strutturali di ogni paese che non variano nel tempo (cultura, posizione geografica, istituzioni storiche).
+  \item \textbf{Vettore dei Regressori $\beta_j$}: Variabili demografiche (\textit{Mortalità, Fertilità}) e infrastrutturali (\textit{Elettricità, Acqua, PIL}) per individuare l'effetto delle variazioni temporali di ogni regressore sull'HDI all'interno di ciascun paese.
+\end{itemize}
+
+## Modello 1 — Effetti fissi con interazioni PLM
+
+\begin{itemize}
+  \item \textbf{Logaritmo del PIL ($\log(GDP)$)}: La trasformazione logaritmica permette di interpretare il coefficiente $\beta_4$ come l'elasticità dell'HDI rispetto alla crescita economica.
+  \item \textbf{Termine di Errore ($\epsilon_{it}$)}: Cattura le fluttuazioni stocastiche e le componenti non osservate tempo-varianti.
+\end{itemize}
+
+\vspace{0.5cm}
+
+\begin{block}{Obiettivo della Stima}
+Stimare la significatività statistica e l'intensità di ogni canale di sviluppo a parità degli altri fattori.
+\end{block}
+
+
+## Scelta Metodologica: Lo stimatore Fixed Effects (Within)
+
+\begin{itemize}
+  \item \textbf{Differenze strutturali tra paesi} (es. clima, risorse naturali) possono influenzare l'HDI ma non variano nel tempo
+  \item \textbf{Eterogeneità non osservata} $\rightarrow$ ogni paese ha un suo "punto di partenza" dell'HDI
+  \item \textbf{Intercetta $\alpha_i$ specifica per ogni paese}: cattura le differenze strutturali fisse che influenzano l'HDI
+\end{itemize}
+
+## Scelta Metodologica: Lo stimatore Fixed Effects (Within)
+
+\begin{itemize}
+  \item \textbf{Analisi delle variazioni Within}: I coefficienti riflettono l'impatto delle variazioni temporali interne a ciascun paese, isolando l'effetto dinamico delle variabili indipendenti
+  \item \textbf{Interpretazione interazioni}: i coefficienti stimati delle \textbf{interazioni} riflettono solo l'effetto delle variazioni temporali all'interno di ogni paese
+  \item \textbf{Riduzione \textit{omitted variable bias}} $\rightarrow$  stima più accurata del nesso tra PIL, demografia e sviluppo umano (HDI).
+\end{itemize}
+
+```{r, include=FALSE}
+model <- plm(HDI ~ Mortality*as.factor(country) + Electricity*as.factor(country) + Fertility*as.factor(country) + log(gdp)*as.factor(country) + Acqua*as.factor(country) + Investimenti_Stranieri*as.factor(country),
+                   data = pdata, model = "within", vcov = function(x) vcovHC(x, type = "HC1"))
+summary(model) |> coef() |> as.data.frame() |> xtable::xtable()
+```
+
+
+## Test di diagnostica - Eteroschedasticità
+```{r, echo=TRUE}
+library(lmtest)
+bptest(model)
+```
+
+Il test di Breusch-Pagan non evidenzia la presenza di eteroschedasticità (p-value > 0.05). Tuttavia, considerando la natura panel dei dati e la complessità del modello, si è comunque scelto di utilizzare errori standard robusti HC1.
+
+```{r, include=FALSE}
+results <- summary(model) |> coef() |> as.data.frame() 
+rownames(results) <- gsub("as.factor\\(country\\)", "", rownames(results))
+results <- results[, c(1, 4)]
+results <- results %>%
+  rename(Coefficient = Estimate, P_value = `Pr(>|t|)`) %>%
+  mutate(Significant = case_when(
+    P_value < 0.001 ~ "***",
+    P_value < 0.01  ~ "**",
+    P_value < 0.05  ~ "*",
+    P_value < 0.1   ~ ".",
+    TRUE            ~ ""
+  ))
+results_mort <- results[grep("Mortality", rownames(results)), ]
+results_elet <- results[grep("Electricity", rownames(results)), ]
+results_fert <- results[grep("Fertility", rownames(results)), ] 
+results_gdp <- results[grep("gdp", rownames(results)), ]
+results_pop <- results[grep("Population", rownames(results)), ]
+results_acqua <- results[grep("Acqua", rownames(results)), ]
+results_invst <- results[grep("Investimenti_Stranieri", rownames(results)), ]
+```
+
+## Coefficienti — Acqua ed Elettricità
+
+```{r}
+knitr::kable(rbind(results_acqua, results_elet), 
+             digits = 4, booktabs = TRUE, format = "latex",
+             col.names = c("Coefficiente", "P-value", "Significativo"))
+```
+
+## Coefficienti — Investimenti Stranieri e log(GDP)
+
+```{r, results='asis'}
+cat("\\resizebox{\\textwidth}{!}{")
+
+knitr::kable(
+  rbind(results_invst, results_gdp),
+  digits = 4,
+  booktabs = TRUE,
+  format = "latex",
+  col.names = c("Coefficiente", "P-value", "Significativo")
+)
+
+cat("}")
+```
+
+## Coefficienti — Fertilità e Mortalità
+
+```{r}
+knitr::kable(rbind(results_fert, results_mort), 
+             digits = 4, booktabs = TRUE, format = "latex",
+             col.names = c("Coefficiente", "P-value", "Significativo"))
+```
+
+## Relazione tra reddito e sviluppo umano per paese
+```{r plot-gdp-hdi, fig.width=10, fig.height=5.5, out.width="100%"}
+palette4 <- c("#0A2D5A","#E07B39","#2C8C4A","#C0392B","#888888")
+df <- as.data.frame(pdata)
+ggplot(df, aes(x = log(gdp), y = HDI, color = country)) +
+  geom_point(alpha = 0.5, size = 1.8) +
+  geom_smooth(method = "lm", se = FALSE, size = 1.2) +
+  scale_color_manual(values = palette4) +
+  labs(x = "log(GDP pro capite)", y = "HDI", color = NULL) +
+  tema
+```
+
+::: {.block}
+{\footnotesize A parità di crescita del reddito, l’impatto sull’HDI varia sensibilmente tra paesi.}
+:::
+
+
+## L'efficienza di trasformazione del reddito (GDP) in HDI
+
+\begin{itemize}
+  \item \textbf{Elasticità differenziata}: I \textbf{coefficienti di interazione} rivelano che l'impatto marginale del reddito non è uniforme tra le nazioni.
+  \item \textbf{Efficienza di conversione}: Un coefficiente $\log(gdp) \times \text{Paese}$ più elevato indica una maggiore capacità del sistema-paese di tradurre la crescita economica in benessere multidimensionale.
+\end{itemize}
+
+Un incremento dell'1% del PIL pro capite produce un aumento di $[\beta_4/100]$ punti di HDI, a parità degli altri regressori.
+
+\begin{block}{Conclusione}
+L'elasticità HDI-PIL conferma i rendimenti decrescenti della ricchezza: la crescita monetaria è condizione necessaria ma non sufficiente per il progresso umano.
+\end{block}
+
+## Eterogeneità tra paesi: Sudafrica vs Nigeria e Senegal
+Le interazioni misurano lo scostamento dalla categoria baseline Ghana. I risultati mostrano differenze significative nell'efficienza di conversione del reddito in sviluppo umano:
+
+\begin{itemize}
+  \item \textbf{Sudafrica (Leader)}: Mostra la pendenza più elevata, segnalando un'architettura istituzionale più efficace nel veicolare risorse verso i pilastri dell'HDI.
+  \item \textbf{Senegal e Nigeria}: Presentano una crescita "disconnessa" dal progresso sociale, suggerendo la presenza di barriere strutturali o inefficienze allocative nella spesa pubblica.
+\end{itemize}
+
+
+## Le altre variabili: Fertilità, Acqua, Elettricità e Mortalità
+
+\begin{itemize}
+  \item Il \textbf{Sudafrica} registra l'HDI più alto tra i quattro paesi; la \textbf{Nigeria} il più basso — nonostante il PIL pro capite più elevato della Nigeria rispetto a Ghana e Senegal in alcuni periodi
+  \item Il \textbf{$\log(\text{GDP})$} e la \textbf{fertilità} sono i determinanti con effetti più robusti sull'HDI, ma con pendenze eterogenee per paese
+  \item \textbf{L'impatto dei servizi di base}: L'accesso all'acqua emerge come un driver di sviluppo più robusto e immediato rispetto all'elettricità nei modelli stimati.
+  \item \textbf{Fertilità}: un coefficiente negativo e significativo indica che un aumento del tasso di fertilità è associato a una diminuzione dell'HDI, probabilmente a causa dell'aumento della dipendenza demografica e della pressione sulle risorse.
+\end{itemize}
+
+
+
+## Modello 2 — Aggiunta dummy di crisi
+Abbiamo testato la resilienza dell'HDI agli shock globali:
+$$\text{HDI}_{it} = \dots + \beta_1 D_{2008} + \beta_2 D_{2020} + \epsilon_{it}$$
+
+\begin{itemize}
+  \item Le dummy di crisi catturano shock macroeconomici esogeni (2008 e COVID-19)
+  \item L’obiettivo è verificare se questi eventi hanno avuto un impatto significativo sull’HDI
+  \item Le interazioni per paese permettono di valutare eterogeneità nella risposta agli shock
+  \item Risultato atteso: possibile maggiore vulnerabilità nei paesi meno sviluppati
+\end{itemize}
+```{r, include=FALSE}
+data$crisis_2008 <- ifelse(data$year >= 2008 & data$year <= 2009, 1, 0)
+data$covid <- ifelse(data$year >= 2020 & data$year <= 2021, 1, 0)
+
+pdata_dummy <- pdata.frame(data, index = c("country", "year"))
+model_dummy<- plm(
+  HDI ~ Mortality*as.factor(country) + Electricity*as.factor(country) + 
+                   Fertility*as.factor(country) + log(gdp)*as.factor(country) + Acqua*as.factor(country) + 
+                   Investimenti_Stranieri*as.factor(country) + crisis_2008*as.factor(country) + covid*as.factor(country),
+  data = pdata_dummy,
+  model = "within"
+)
+summary(model_dummy) |> coef() |> as.data.frame() |> xtable::xtable()
+summary(model_dummy)
+```
+```{r, include=FALSE}
+results_dummy <- summary(model_dummy)$coefficients |> 
+  as.data.frame()
+
+colnames(results_dummy) <- c(
+  "Coefficient",
+  "Std_Error",
+  "t_value",
+  "P_value"
+)
+
+results_dummy <- results_dummy %>%
+  select(Coefficient, P_value) %>%
+  mutate(Significant = case_when(
+    P_value < 0.001 ~ "***",
+    P_value < 0.01  ~ "**",
+    P_value < 0.05  ~ "*",
+    P_value < 0.1   ~ ".",
+    TRUE            ~ ""
+  ))
+
+results_crisi <- results_dummy[
+  grepl("crisis_2008|covid", rownames(results_dummy)),
+]
+```
+
+## Coefficienti dummy di crisi
+```{r, results='asis'}
+cat("\\resizebox{\\textwidth}{!}{")
+
+knitr::kable(
+  results_crisi,
+  digits = 4,
+  booktabs = TRUE,
+  format = "latex",
+  col.names = c("Coefficiente", "P-value", "Sig.")
+)
+
+cat("}")
+```
+
+## Analisi della resilienza: Shock 2008 e COVID-19
+\begin{itemize}
+  \item \textbf{Resilienza differenziata}: I paesi con coefficienti negativi significativi per le dummy di crisi mostrano una maggiore vulnerabilità agli shock globali.
+  \item \textbf{COVID-19}: La pandemia ha avuto un impatto negativo significativo sull'HDI, con effetti più pronunciati in \textsf{Nigeria}e \textsf{Senegal} rispetto al Sudafrica.
+  \item \textbf{Crisi 2008}: L'effetto è meno pronunciato, ma ancora negativo per la Nigeria, suggerendo una maggiore esposizione agli shock finanziari globali.
+  \item \textbf{Implicazioni politiche}: Necessità di strategie di mitigazione del rischio e diversificazione economica per aumentare la resilienza agli shock futuri, soprattutto nei paesi più vulnerabili.
+\end{itemize}
+
+## Sviluppi futuri e proposte di policy !
+\begin{block}{Riforme Istituzionali}
+Per i paesi con bassa interazione, la priorità è migliorare la governance, la trasparenza e l'efficienza della spesa pubblica per tradurre meglio la crescita economica in sviluppo umano.
+\end{block}
+
+\begin{block}{Protezione sociale e prevenzione economica}
+Creazione di fondi di stabilizzazione e reti di sicurezza sociale per proteggere i più vulnerabili durante shock economici, con particolare attenzione a Nigeria e Senegal.
+Fondi necessari per investimenti in servizi educativi e sanitari per protezione durante le crisi future. 
+\end{block}
+
+## Sviluppi futuri e proposte di policy
+
+\begin{block}{Diversificazione economica}
+Ridurre la dipendenza da settori volatili (es. risorse naturali) e promuovere lo sviluppo di industrie manifatturiere e tecnologiche per aumentare la resil ienza economica e migliorare l'HDI a lungo termine.
+\end{block}
+
+\begin{block}{Monitoraggio e valutazione continua}
+Adottare l'Elasticità sociale del reddito come nuovo KPI per valutare il successo di un goverso oltre alla crescita economica (GDP), con report annuali per monitorare i progressi verso obiettivi di sviluppo umano più inclusivi e sostenibili.
+\end{block}
+
+
+## Limiti della ricerca
+
+\begin{itemize}
+  \item Problemi di mancanza di dati e qualità: alcune variabili chiave (es. MPI) presentavano lacune temporali o misurazioni inconsistenti tra paesi, 
+  \item Campione ridotto (4 paesi, 34 anni): potere statistico limitato per i test di diagnostica
+  \item Possibile \textbf{autocorrelazione seriale} nei residui — stimatori GMM come alternativa
+  \item Estendere l'analisi ad altri paesi dell'Africa Sub-Sahariana per una maggiore generalizzabilità
+  \item Includere variabili istituzionali (governance, rule of law) come determinanti non economici dell'HDI
+\end{itemize}
+
+\vspace{0.5em}
+\begin{center}
+\textit{Grazie per l'attenzione}
+\end{center}
