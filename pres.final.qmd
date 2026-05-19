@@ -255,13 +255,12 @@ corrplot(cor_matrix, method="color", type="upper",
          col=colorRampPalette(c("#C0392B","white","#0A2D5A"))(200))
 ```
 :::
-::: {.column width="50%"}
+::: {.column width="35%"}
 \small
 \textbf{Osservazioni chiave:}
 \begin{itemize}
-  \item Forte correlazione tra HDI e Mortalità (--0.85).
-  \item Elevata collinearità tra PIL, Acqua ed Elettricità.
-  \item \textbf{Nota sul VIF:} La mortalità funge da ``proxy'' delle altre variabili, rendendo il VIF matematicamente esplosivo ma economicamente ridondante.
+  \item Elevata collinearità positiva (0.90) tra Acqua ed Elettricità, servizi che procedono di pari passo.
+  \item Il \textbf{PIL (gdp)} è un forte traino per le infrastrutture (0.77 con Elettricità e 0.71 con Acqua).
 \end{itemize}
 :::
 ::::::
@@ -433,8 +432,9 @@ L'elasticità HDI-PIL conferma i rendimenti decrescenti della ricchezza: la cres
 Le interazioni misurano lo scostamento dalla categoria baseline Ghana. I risultati mostrano differenze significative nell'efficienza di conversione del reddito in sviluppo umano:
 
 \begin{itemize}
-  \item \textbf{Sudafrica (Leader)}: Mostra la pendenza più elevata, segnalando un'architettura istituzionale più efficace nel veicolare risorse verso i pilastri dell'HDI.
-  \item \textbf{Senegal e Nigeria}: Presentano una crescita "disconnessa" dal progresso sociale, suggerendo la presenza di barriere strutturali o inefficienze allocative nella spesa pubblica.
+  \item \textbf{Ghana (Leader)}: Si dimostra il paese più efficiente nel tradurre la crescita del PIL in sviluppo umano.
+  \item \textbf{Nigeria}: Presenta il coefficiente di interazione negativo più forte (-0.0189, significativo), che annulla il beneficio della crescita, indicando una grave inefficienza allocativa.
+  \item \textbf{Senegal e Sudafrica}: Mostrano un'elasticità positiva ma sensibilmente inferiore rispetto al Ghana.
 \end{itemize}
 
 
