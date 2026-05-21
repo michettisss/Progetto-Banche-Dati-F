@@ -14,6 +14,12 @@ format:
     header-includes: |
       \usepackage{booktabs}
       \definecolor{darkblue}{RGB}{10, 45, 90}
+      \setbeamercolor{title page background}{fg=white, bg=darkblue}
+      \setbeamercolor{palette primary}{bg=darkblue, fg=white}
+      \setbeamercolor{palette secondary}{bg=darkblue, fg=white}
+      \setbeamercolor{palette tertiary}{bg=darkblue, fg=white}
+      \setbeamercolor{palette quaternary}{bg=darkblue, fg=white}
+      
       \setbeamercolor{frametitle}{bg=darkblue, fg=white}
       \setbeamercolor{title separator}{fg=darkblue}
       \setbeamercolor{progress bar}{fg=darkblue}
@@ -112,7 +118,7 @@ data_wb <- data_wb %>%
 
 
 # UNDP DATA (HDI) 
-url_undp <- "https://hdr.undp.org/sites/default/files/2023-24_HDR/HDR23-24_Composite_indices_complete_time_series.csv"
+url_undp <- "https://hdr.undp.org/sites/default/files/2025_HDR/HDR25_Composite_indices_complete_time_series.csv"
 url_undp <- sub("^\\[.*\\]\\((.*)\\)$", "\\1", url_undp)
 temp_file <- tempfile(fileext = ".csv")
 download.file(url_undp, temp_file, mode = "wb", quiet = TRUE, method = "auto")
@@ -343,7 +349,7 @@ library(lmtest)
 bptest(model)
 ```
 
-Il test di Breusch-Pagan non evidenzia la presenza di eteroschedasticità (p-value > 0.05). Tuttavia, considerando la natura panel dei dati e la complessità del modello, si è comunque scelto di utilizzare errori standard robusti HC1.
+Il test di Breusch-Pagan evidenzia la presenza di eteroschedasticità (p-value = 0.01051 < 0.05). Si è scelto di utilizzare errori standard robusti HC1 per correggere questo problema.
 
 ```{r, include=FALSE}
 results <- summary(model) |> coef() |> as.data.frame() 
@@ -430,11 +436,11 @@ L'elasticità HDI-PIL conferma i rendimenti decrescenti della ricchezza: la cres
 \end{block}
 
 ## Eterogeneità tra paesi: Sudafrica vs Nigeria e Senegal
-Le interazioni misurano lo scostamento dalla categoria baseline Ghana. I risultati mostrano differenze significative nell'efficienza di conversione del reddito in sviluppo umano:
+Le interazioni misurano lo scostamento dalla categoria baseline Ghana. I risultati non mostrano differenze significative nell'efficienza di conversione del reddito in sviluppo umano. Tuttavia, osservando i coefficienti di interazione, emergono pattern interessanti. Questo suggerisce un'eterogeneità strutturale che il modello, con soli 4 paesi e 34 anni, potrebbe non avere potenza statistica sufficiente a catturare formalmente:
 
 \begin{itemize}
-  \item \textbf{Sudafrica (Leader)}: Mostra la pendenza più elevata, segnalando un'architettura istituzionale più efficace nel veicolare risorse verso i pilastri dell'HDI.
-  \item \textbf{Senegal e Nigeria}: Presentano una crescita "disconnessa" dal progresso sociale, suggerendo la presenza di barriere strutturali o inefficienze allocative nella spesa pubblica.
+  \item \textbf{Sudafrica (leader)}: tende a convertire la crescita economica in HDI più efficacemente rispetto a Nigeria e Senegal, segnalando un'architettura istituzionale più efficace nel veicolare risorse verso i pilastri dell'HDI.
+  \item \textbf{Senegal e Nigeria}: mostra livelli di HDI relativamente bassi rispetto al proprio PIL, suggerendo la presenza di barriere strutturali o inefficienze allocative nella spesa pubblica.
 \end{itemize}
 
 
@@ -518,12 +524,12 @@ cat("}")
 ## Analisi della resilienza: Shock 2008 e COVID-19
 \begin{itemize}
   \item \textbf{Resilienza differenziata}: I paesi con coefficienti negativi significativi per le dummy di crisi mostrano una maggiore vulnerabilità agli shock globali.
-  \item \textbf{COVID-19}: La pandemia ha avuto un impatto negativo significativo sull'HDI, con effetti più pronunciati in \textsf{Nigeria}e \textsf{Senegal} rispetto al Sudafrica.
-  \item \textbf{Crisi 2008}: L'effetto è meno pronunciato, ma ancora negativo per la Nigeria, suggerendo una maggiore esposizione agli shock finanziari globali.
+  \item \textbf{COVID-19}: Solo il Sudafrica mostra un calo significativo dell'HDI, probabilmente per la maggiore integrazione nei mercati globali (turismo, servizi)
+  \item \textbf{Crisi 2008}: Nessun paese mostra un impatto statisticamente significativo. Per la Nigeria, l'effetto è negativo, suggerendo una maggiore esposizione agli shock finanziari globali.
   \item \textbf{Implicazioni politiche}: Necessità di strategie di mitigazione del rischio e diversificazione economica per aumentare la resilienza agli shock futuri, soprattutto nei paesi più vulnerabili.
 \end{itemize}
 
-## Sviluppi futuri e proposte di policy !
+## Sviluppi futuri e proposte di policy 
 \begin{block}{Riforme Istituzionali}
 Per i paesi con bassa interazione, la priorità è migliorare la governance, la trasparenza e l'efficienza della spesa pubblica per tradurre meglio la crescita economica in sviluppo umano.
 \end{block}
