@@ -19,7 +19,6 @@ format:
       \setbeamercolor{palette secondary}{bg=darkblue, fg=white}
       \setbeamercolor{palette tertiary}{bg=darkblue, fg=white}
       \setbeamercolor{palette quaternary}{bg=darkblue, fg=white}
-      
       \setbeamercolor{frametitle}{bg=darkblue, fg=white}
       \setbeamercolor{title separator}{fg=darkblue}
       \setbeamercolor{progress bar}{fg=darkblue}
@@ -265,9 +264,9 @@ corrplot(cor_matrix, method="color", type="upper",
 \small
 \textbf{Osservazioni chiave:}
 \begin{itemize}
-  \item Forte correlazione tra HDI e Mortalità (--0.85).
-  \item Elevata collinearità tra PIL, Acqua ed Elettricità.
-  \item \textbf{Nota sul VIF:} La mortalità funge da ``proxy'' delle altre variabili, rendendo il VIF matematicamente esplosivo ma economicamente ridondante.
+  \item Forte correlazione tra fecondità, elettricità e accesso all'acqua.
+  \item \textbf{GDP}: correlato con elettricità (0.76) e acqua (0.69), ma meno con le altre variabili.
+  \item \textbf{FDI}: correlazioni deboli con tutte le variabili → regressore relativamente indipendente.
 \end{itemize}
 :::
 ::::::
