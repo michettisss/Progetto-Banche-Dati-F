@@ -434,12 +434,12 @@ Un incremento dell'1% del PIL pro capite produce un aumento di $[\beta_4/100]$ p
 L'elasticità HDI-PIL conferma i rendimenti decrescenti della ricchezza: la crescita monetaria è condizione necessaria ma non sufficiente per il progresso umano.
 \end{block}
 
-## Eterogeneità tra paesi: Sudafrica vs Nigeria e Senegal
+## Eterogeneità tra paesi
 Le interazioni misurano lo scostamento dalla categoria baseline Ghana. I risultati non mostrano differenze significative nell'efficienza di conversione del reddito in sviluppo umano. Tuttavia, osservando i coefficienti di interazione, emergono pattern interessanti. Questo suggerisce un'eterogeneità strutturale che il modello, con soli 4 paesi e 34 anni, potrebbe non avere potenza statistica sufficiente a catturare formalmente:
 
 \begin{itemize}
-  \item \textbf{Sudafrica (leader)}: tende a convertire la crescita economica in HDI più efficacemente rispetto a Nigeria e Senegal, segnalando un'architettura istituzionale più efficace nel veicolare risorse verso i pilastri dell'HDI.
-  \item \textbf{Senegal e Nigeria}: mostra livelli di HDI relativamente bassi rispetto al proprio PIL, suggerendo la presenza di barriere strutturali o inefficienze allocative nella spesa pubblica.
+  \item \textbf{Senegal}: tende a convertire la crescita economica in HDI più efficacemente rispetto agli altri paesi, segnalando un'architettura istituzionale più efficace nel veicolare risorse verso i pilastri dell'HDI.
+  \item \textbf{Nigeria}: mostra livelli di HDI relativamente bassi rispetto al proprio PIL, suggerendo la presenza di barriere strutturali o inefficienze allocative nella spesa pubblica.
 \end{itemize}
 
 
@@ -447,7 +447,6 @@ Le interazioni misurano lo scostamento dalla categoria baseline Ghana. I risulta
 
 \begin{itemize}
   \item Il \textbf{Sudafrica} registra l'HDI più alto tra i quattro paesi; la \textbf{Nigeria} il più basso — nonostante il PIL pro capite più elevato della Nigeria rispetto a Ghana e Senegal in alcuni periodi
-  \item Il \textbf{$\log(\text{GDP})$} e la \textbf{fertilità} sono i determinanti con effetti più robusti sull'HDI, ma con pendenze eterogenee per paese
   \item \textbf{L'impatto dei servizi di base}: L'accesso all'acqua emerge come un driver di sviluppo più robusto e immediato rispetto all'elettricità nei modelli stimati.
   \item \textbf{Fertilità}: un coefficiente negativo e significativo indica che un aumento del tasso di fertilità è associato a una diminuzione dell'HDI, probabilmente a causa dell'aumento della dipendenza demografica e della pressione sulle risorse.
 \end{itemize}
